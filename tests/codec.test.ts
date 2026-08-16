@@ -179,6 +179,37 @@ describe("property-based round-trip", async () => {
   })
 })
 
+describe("cross-context backrefs", async () => {
+  test("query values referencing path segments round-trip", async () => {
+    const url = "https://example.com/repos/vercel/next.js?repo=vercel&name=next.js&fork=vercel"
+    const result = await encodeUrl(url)
+    expect((await decodePayloadString(result.ultraPayload)).target).toBe(result.canonical)
+    expect((await decodePayloadString(result.humanPayload)).target).toBe(result.canonical)
+  })
+
+  test("SEGMENT_BACKREF with out-of-range index is rejected", async () => {
+    const { ByteWriter } = await import("@/lib/codec/writer")
+    const { formatByte, DecodeError } = await import("@/lib/codec/types")
+    const { Opcode } = await import("@/lib/codec/opcodes")
+    const { decodePayloadBytes } = await import("@/lib/codec/candidates")
+    const w = new ByteWriter()
+    w.byte(formatByte("specialized", 0))
+    w.byte(0b0000_1000)
+    w.byte(Opcode.LITERAL_BYTES)
+    w.byte(11)
+    w.bytes(new TextEncoder().encode("example.com"))
+    w.byte(Opcode.END)
+    w.varint(0)
+    w.varint(1)
+    w.byte(Opcode.LITERAL_BYTES)
+    w.byte(1)
+    w.bytes(new TextEncoder().encode("q"))
+    w.byte(Opcode.SEGMENT_BACKREF)
+    w.varint(9)
+    await expect(decodePayloadBytes(w.finish())).rejects.toBeInstanceOf(DecodeError)
+  })
+})
+
 describe("dictionary versioning", async () => {
   test("version 0 is registered and immutable", async () => {
     const set = getDictionaries(0)

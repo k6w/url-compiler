@@ -78,13 +78,38 @@ No Unicode or emoji in the canonical payload, ever. Unicode is permitted in dest
 encoded as compact UTF-8 bytes inside literals) but payload alphabets are pure ASCII to avoid
 homograph, normalization, and percent-encoding abuse (UTS #39 concerns).
 
+## Service templates
+
+`lib/codec/templates.ts` — versioned, immutable-ID templates that absorb host + path + query
+structure into a single opcode when they win on size. **Exact-form semantics**: reconstruction is
+byte-identical to the input; anything that would be dropped or rewritten (alternate hosts like
+`m.youtube.com`, `t=1m30s` durations, `/gp/product` paths, ref queries) blocks the template and
+falls back to generic bytecode — no silent canonicalization. YouTube watch/shorts (per-host IDs),
+GitHub repo/issues/pull, Amazon ASIN.
+
 ## Dictionaries
 
-`data/dictionaries/v0.json` is **immutable forever**: `hosts`, `labels`, `suffixes` (multi-label
-PSL-style: `co.uk`, `github.io`, …), `paths`, `queryKeys`, `values`. IDs never change meaning;
-new dictionaries get new version numbers, are selected by an envelope flag + varint, and every old
-version stays decodable. `bun tools/analyze-corpus.ts` proposes candidates;
-`bun tools/build-dictionary.ts` drafts the *next* version and refuses to touch existing files.
+`data/dictionaries/v0.json` and `v1.json` are **immutable forever**: `hosts`, `labels`,
+`suffixes` (multi-label PSL-style: `co.uk`, `github.io`, …), `paths`, `queryKeys`, `values`. IDs
+never change meaning; new dictionaries get new version numbers, are selected by an envelope flag +
+varint, and every old version stays decodable (golden tests prove it across versions).
+
+v1 is active: frequency-tuned inline-32 slots + new tokens, **-12.2% corpus payload** vs v0. The
+builder guards against overfitting: `--min-count` frequency floor (default 2) and an entropy/shape
+filter reject single-occurrence and random-looking tokens — dictionaries must generalize, not
+memorize the corpus. `bun run dict:analyze` proposes candidates; `bun run dict:build` drafts the
+next version and refuses to touch existing files.
+
+## Compression decisions (bench-gated)
+
+- **Brotli / DEFLATE**: emitted candidates, verified round-trip, shortest complete URL wins.
+- **Zstandard**: benchmarked with raw-content dictionary (`bun tools/zstd-bench.ts`) — loses to
+  both on every category (frame overhead dominates at URL scale, dictionary gives zero gain).
+  Rejected; not wired into candidates.
+- **Huffman literals**: spike (`bun tools/huffman-spike.ts`, report in `data/analysis/`) measured
+  a **15% total-payload ceiling** (literals are 57.6% of the stream, 26.1% literal shrink) —
+  above the 8% gate. Scheduled as the next format work (specialized format v1, canonical code
+  tables per dictionary version).
 
 ## Security
 
@@ -185,8 +210,8 @@ Also works with Cloudflare as a plain CDN/proxy in front of the self-hosted orig
 
 ## Not yet implemented (deliberately)
 
-Voice mode, Huffman/range coding of the specialized stream, Zstandard, shared-dictionary Brotli,
-service templates, and encrypted/server-blind modes are stubs or absent — the foundation is
+Huffman-coded literal format v1 (spike approved, next up), voice mode, range coding,
+shared-dictionary Brotli, and encrypted/server-blind modes — the foundation stays
 small, deterministic, versioned, and perfectly reversible first.
 
 ## Deployment constraints

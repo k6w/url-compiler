@@ -12,12 +12,19 @@ export interface Emission {
   emit: (w: ByteWriter) => void
 }
 
+export let literalCollector: Uint8Array[] | null = null
+
+export function collectLiteralBytes(sink: Uint8Array[] | null): void {
+  literalCollector = sink
+}
+
 export function literalEmission(text: string): Emission {
   const bytes = utf8.encode(text)
   const cost = 1 + varintLen(bytes.length) + bytes.length
   return {
     cost,
     emit: (w) => {
+      if (literalCollector !== null) literalCollector.push(bytes)
       w.byte(Opcode.LITERAL_BYTES)
       w.varint(bytes.length)
       w.bytes(bytes)

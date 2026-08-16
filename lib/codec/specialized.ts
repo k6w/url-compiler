@@ -244,6 +244,7 @@ export function encodeSpecialized(model: UrlModel, dictVersion: number): Uint8Ar
 
   if (flags & FLAG_QUERY) {
     genericCore.varint(model.query.length)
+    const segmentTexts = model.pathSegments.map((s) => s.text)
     for (const pair of model.query) {
       cheapest(queryKeyEmissions(pair.key, set)).emit(genericCore)
       if (pair.value === null) {
@@ -256,7 +257,18 @@ export function encodeSpecialized(model: UrlModel, dictVersion: number): Uint8Ar
       } else if (pair.value === "false") {
         genericCore.byte(Opcode.BOOLEAN_FALSE)
       } else {
-        cheapest(queryValueEmissions(pair.value, set)).emit(genericCore)
+        const candidates: Emission[] = queryValueEmissions(pair.value, set)
+        const refIdx = segmentTexts.indexOf(pair.value)
+        if (refIdx >= 0) {
+          candidates.push({
+            cost: 1 + varintLen(refIdx),
+            emit: (w) => {
+              w.byte(Opcode.SEGMENT_BACKREF)
+              w.varint(refIdx)
+            },
+          })
+        }
+        cheapest(candidates).emit(genericCore)
       }
     }
   }
@@ -507,6 +519,11 @@ export function decodeSpecialized(r: ByteReader, flags: number, set: DictionaryS
       if (vb === Opcode.EMPTY_VALUE) value = null
       else if (vb === Opcode.BOOLEAN_TRUE) value = "true"
       else if (vb === Opcode.BOOLEAN_FALSE) value = "false"
+      else if (vb === Opcode.SEGMENT_BACKREF) {
+        const idx = r.readVarint()
+        if (idx >= segments.length) throw new DecodeError("VALUE_OUT_OF_RANGE", "SEGMENT_BACKREF index out of range")
+        value = segments[idx]
+      }
       else if (vb === Opcode.REPEAT || vb === Opcode.BACKREF) throw new DecodeError("INVALID_OPCODE", "opcode not allowed for query value")
       else value = isInlineIntegerByte(vb) ? String(vb - INLINE_INTEGER_BASE) : decodeInstruction(vb, r, set, "value")
       query.push({ key, value })

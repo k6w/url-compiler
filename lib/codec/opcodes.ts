@@ -20,6 +20,7 @@ export const Opcode = {
   PASSWORD: 0x12,
   BACKREF: 0x13,
   SERVICE_TEMPLATE: 0x14,
+  SEGMENT_BACKREF: 0x15,
 } as const
 
 export const INLINE_DICTIONARY_BASE = 0x20
