@@ -17,7 +17,23 @@ import {
   varintLen,
   dictionaryRefCost,
 } from "./opcodes"
-import { ByteWriter, zigzagEncode } from "./writer"
+import { ByteWriter } from "./writer"
+import { matchTemplate, encodeTemplateBody, decodeTemplateBody } from "./templates"
+import {
+  type Emission,
+  literalEmission,
+  dictRefEmission,
+  inlineDictEmission,
+  contextDictEmission,
+  integerEmission,
+  uuidEmission,
+  hexEmission,
+  hexToBytes,
+  bytesToHex,
+  bytesToUuid,
+  cheapest,
+  typedValueEmissions,
+} from "./emissions"
 import {
   DecodeError,
   FLAG_CREDENTIALS,
@@ -30,131 +46,6 @@ import {
 } from "./types"
 
 const utf8 = new TextEncoder()
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-const HEX_RE = /^[0-9a-f]+$/
-const INT_RE = /^(0|-?[1-9]\d*)$/
-
-interface Emission {
-  cost: number
-  emit: (w: ByteWriter) => void
-}
-
-function literalEmission(text: string): Emission {
-  const bytes = utf8.encode(text)
-  const cost = 1 + varintLen(bytes.length) + bytes.length
-  return {
-    cost,
-    emit: (w) => {
-      w.byte(Opcode.LITERAL_BYTES)
-      w.varint(bytes.length)
-      w.bytes(bytes)
-    },
-  }
-}
-
-function dictRefEmission(opcode: number, id: number): Emission {
-  return {
-    cost: dictionaryRefCost(id),
-    emit: (w) => {
-      w.byte(opcode)
-      w.varint(id)
-    },
-  }
-}
-
-function inlineDictEmission(id: number): Emission {
-  return {
-    cost: 1,
-    emit: (w) => w.byte(INLINE_DICTIONARY_BASE + id),
-  }
-}
-
-function contextDictEmission(opcode: number, id: number): Emission {
-  return id < 32 ? inlineDictEmission(id) : dictRefEmission(opcode, id)
-}
-
-function integerEmission(text: string): Emission | null {
-  if (!INT_RE.test(text)) return null
-  const n = Number(text)
-  if (n > 0x7fffffff || n < -0x80000000) return null
-  if (n >= 0 && n <= 31) {
-    return {
-      cost: 1,
-      emit: (w) => w.byte(INLINE_INTEGER_BASE + n),
-    }
-  }
-  const z = zigzagEncode(n)
-  return {
-    cost: 1 + varintLen(z),
-    emit: (w) => {
-      w.byte(Opcode.INTEGER)
-      w.zigzag(n)
-    },
-  }
-}
-
-function uuidEmission(text: string): Emission | null {
-  if (!UUID_RE.test(text)) return null
-  const bytes = hexToBytes(text.replace(/-/g, ""))
-  return {
-    cost: 1 + 16,
-    emit: (w) => {
-      w.byte(Opcode.UUID)
-      w.bytes(bytes)
-    },
-  }
-}
-
-function hexEmission(text: string): Emission | null {
-  if (text.length < 2 || text.length % 2 !== 0 || !HEX_RE.test(text)) return null
-  const bytes = hexToBytes(text)
-  return {
-    cost: 1 + varintLen(bytes.length) + bytes.length,
-    emit: (w) => {
-      w.byte(Opcode.HEX_BYTES)
-      w.varint(bytes.length)
-      w.bytes(bytes)
-    },
-  }
-}
-
-function hexToBytes(hex: string): Uint8Array {
-  const out = new Uint8Array(hex.length / 2)
-  for (let i = 0; i < out.length; i++) {
-    out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16)
-  }
-  return out
-}
-
-function bytesToHex(bytes: Uint8Array): string {
-  let s = ""
-  for (let i = 0; i < bytes.length; i++) s += bytes[i].toString(16).padStart(2, "0")
-  return s
-}
-
-function bytesToUuid(bytes: Uint8Array): string {
-  const h = bytesToHex(bytes)
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`
-}
-
-function cheapest(candidates: Emission[]): Emission {
-  let best = candidates[0]
-  for (const c of candidates) {
-    if (c.cost < best.cost) best = c
-  }
-  return best
-}
-
-function typedValueEmissions(text: string): Emission[] {
-  const emissions: Emission[] = [literalEmission(text)]
-  const int = integerEmission(text)
-  if (int) emissions.push(int)
-  const uuid = uuidEmission(text)
-  if (uuid) emissions.push(uuid)
-  const hex = hexEmission(text)
-  if (hex) emissions.push(hex)
-  return emissions
-}
 
 function hostEmissions(hostname: string, set: DictionarySet): Emission[] {
   const wholeLiteral: Emission = {
@@ -324,65 +215,113 @@ export function encodeSpecialized(model: UrlModel, dictVersion: number): Uint8Ar
   if (model.fragmentPresent) flags |= FLAG_FRAGMENT
   if (dictVersion > 0) flags |= FLAG_DICT_VERSION_EXT
 
-  const body = new ByteWriter()
-  cheapest(hostEmissions(model.hostname, set)).emit(body)
+  const genericCore = new ByteWriter()
+  cheapest(hostEmissions(model.hostname, set)).emit(genericCore)
 
   if (flags & FLAG_CREDENTIALS) {
     const ub = utf8.encode(model.username ?? "")
-    body.byte(Opcode.USERNAME)
-    body.varint(ub.length)
-    body.bytes(ub)
+    genericCore.byte(Opcode.USERNAME)
+    genericCore.varint(ub.length)
+    genericCore.bytes(ub)
     if (model.password !== undefined) {
       const pb = utf8.encode(model.password)
-      body.byte(Opcode.PASSWORD)
-      body.varint(pb.length)
-      body.bytes(pb)
+      genericCore.byte(Opcode.PASSWORD)
+      genericCore.varint(pb.length)
+      genericCore.bytes(pb)
     }
   }
 
   if (flags & FLAG_PORT) {
-    body.byte(Opcode.PORT)
-    body.varint(model.port!)
+    genericCore.byte(Opcode.PORT)
+    genericCore.varint(model.port!)
   }
 
   encodePath(
     model.pathSegments.map((s) => s.text),
     set,
-    body,
+    genericCore,
   )
 
   if (flags & FLAG_QUERY) {
-    body.varint(model.query.length)
+    genericCore.varint(model.query.length)
     for (const pair of model.query) {
-      cheapest(queryKeyEmissions(pair.key, set)).emit(body)
+      cheapest(queryKeyEmissions(pair.key, set)).emit(genericCore)
       if (pair.value === null) {
-        body.byte(Opcode.EMPTY_VALUE)
+        genericCore.byte(Opcode.EMPTY_VALUE)
       } else if (pair.value === "") {
-        body.byte(Opcode.LITERAL_BYTES)
-        body.varint(0)
+        genericCore.byte(Opcode.LITERAL_BYTES)
+        genericCore.varint(0)
       } else if (pair.value === "true") {
-        body.byte(Opcode.BOOLEAN_TRUE)
+        genericCore.byte(Opcode.BOOLEAN_TRUE)
       } else if (pair.value === "false") {
-        body.byte(Opcode.BOOLEAN_FALSE)
+        genericCore.byte(Opcode.BOOLEAN_FALSE)
       } else {
-        cheapest(queryValueEmissions(pair.value, set)).emit(body)
+        cheapest(queryValueEmissions(pair.value, set)).emit(genericCore)
       }
     }
   }
 
-  if (flags & FLAG_FRAGMENT) {
-    const fb = utf8.encode(model.fragment ?? "")
-    body.byte(Opcode.FRAGMENT)
-    body.varint(fb.length)
-    body.bytes(fb)
+  let core: Uint8Array
+  let effectiveFlags = flags
+  const templateMatch = flags & (FLAG_HTTP | FLAG_PORT | FLAG_CREDENTIALS) ? null : matchTemplate(model)
+  if (templateMatch !== null) {
+    const templateBytes = encodeTemplateBody(templateMatch)
+    if (templateBytes.length < genericCore.length) {
+      core = templateBytes
+      effectiveFlags = flags & ~FLAG_QUERY
+    } else {
+      core = genericCore.finish()
+    }
+  } else {
+    core = genericCore.finish()
   }
 
   const w = new ByteWriter()
   w.byte(formatByte("specialized", 0))
-  w.byte(flags)
-  if (flags & FLAG_DICT_VERSION_EXT) w.varint(dictVersion)
-  w.bytes(body.finish())
+  w.byte(effectiveFlags)
+  if (effectiveFlags & FLAG_DICT_VERSION_EXT) w.varint(dictVersion)
+  w.bytes(core)
+
+  if (flags & FLAG_FRAGMENT) {
+    const fb = utf8.encode(model.fragment ?? "")
+    w.byte(Opcode.FRAGMENT)
+    w.varint(fb.length)
+    w.bytes(fb)
+  }
+
   return w.finish()
+}
+
+function decodeSpecializedTemplate(r: ByteReader, flags: number): UrlModel {
+  if (flags & (FLAG_HTTP | FLAG_PORT | FLAG_CREDENTIALS | FLAG_QUERY)) {
+    throw new DecodeError("INVALID_OPCODE", "template payload must not carry http/port/credentials/query flags")
+  }
+  r.readByte()
+  const parts = decodeTemplateBody(r)
+
+  let fragment: string | undefined
+  if (flags & FLAG_FRAGMENT) {
+    if (r.readByte() !== Opcode.FRAGMENT) throw new DecodeError("INVALID_OPCODE", "expected FRAGMENT")
+    const len = r.readVarint()
+    if (len > config.maxSegmentBytes) throw new DecodeError("LIMIT_EXCEEDED", "fragment too large")
+    fragment = r.readUtf8(len)
+  }
+  r.expectEnd()
+
+  const model: UrlModel = {
+    scheme: "https",
+    hostname: parts.hostname,
+    port: undefined,
+    username: undefined,
+    password: undefined,
+    pathSegments: parts.pathSegments,
+    query: parts.query,
+    queryPresent: parts.queryPresent,
+    fragment,
+    fragmentPresent: (flags & FLAG_FRAGMENT) !== 0,
+  }
+  validateModelLimits(model)
+  return model
 }
 
 type InstructionContext = "path" | "key" | "value"
@@ -441,6 +380,10 @@ function isInlineIntegerValue(b: number): boolean {
 }
 
 export function decodeSpecialized(r: ByteReader, flags: number, set: DictionarySet): UrlModel {
+  if (r.peek() === Opcode.SERVICE_TEMPLATE) {
+    return decodeSpecializedTemplate(r, flags)
+  }
+
   let wholeHost: string | null = null
   const labels: string[] = []
   let suffix: string | null = null

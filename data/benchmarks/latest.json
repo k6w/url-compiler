@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-16T14:07:15.569Z",
+  "generatedAt": "2026-08-16T14:19:15.493Z",
   "total": 49,
   "shortenedCount": 5,
   "categories": [
@@ -12,7 +12,7 @@
       "avgHuman": 53,
       "minUltra": 29,
       "maxUltra": 76,
-      "encodeMs": 1.08,
+      "encodeMs": 0.96,
       "decodeMs": 0.01
     },
     {
@@ -24,7 +24,7 @@
       "avgHuman": 138,
       "minUltra": 62,
       "maxUltra": 116,
-      "encodeMs": 1.24,
+      "encodeMs": 1.11,
       "decodeMs": 0.03
     },
     {
@@ -36,7 +36,7 @@
       "avgHuman": 143,
       "minUltra": 80,
       "maxUltra": 116,
-      "encodeMs": 1.31,
+      "encodeMs": 1.29,
       "decodeMs": 0.02
     },
     {
@@ -48,8 +48,8 @@
       "avgHuman": 150,
       "minUltra": 77,
       "maxUltra": 132,
-      "encodeMs": 1.97,
-      "decodeMs": 0.04
+      "encodeMs": 1.81,
+      "decodeMs": 0.02
     },
     {
       "category": "uuid",
@@ -60,7 +60,7 @@
       "avgHuman": 136,
       "minUltra": 85,
       "maxUltra": 117,
-      "encodeMs": 0.97,
+      "encodeMs": 0.84,
       "decodeMs": 0.02
     },
     {
@@ -72,7 +72,7 @@
       "avgHuman": 141,
       "minUltra": 62,
       "maxUltra": 182,
-      "encodeMs": 1.42,
+      "encodeMs": 1.36,
       "decodeMs": 0.02
     },
     {
@@ -84,7 +84,7 @@
       "avgHuman": 116,
       "minUltra": 64,
       "maxUltra": 128,
-      "encodeMs": 1.46,
+      "encodeMs": 1.43,
       "decodeMs": 0.02
     },
     {
@@ -96,7 +96,7 @@
       "avgHuman": 163,
       "minUltra": 84,
       "maxUltra": 173,
-      "encodeMs": 1.48,
+      "encodeMs": 1.41,
       "decodeMs": 0.02
     },
     {
@@ -108,20 +108,20 @@
       "avgHuman": 98,
       "minUltra": 50,
       "maxUltra": 90,
-      "encodeMs": 1,
+      "encodeMs": 1.07,
       "decodeMs": 0.02
     },
     {
       "category": "service-template",
       "urls": 6,
       "avgOriginal": 50,
-      "avgUltra": 66,
-      "avgUltraPayload": 44,
-      "avgHuman": 91,
-      "minUltra": 52,
+      "avgUltra": 65,
+      "avgUltraPayload": 43,
+      "avgHuman": 88,
+      "minUltra": 46,
       "maxUltra": 92,
-      "encodeMs": 1.35,
-      "decodeMs": 0.03
+      "encodeMs": 1.4,
+      "decodeMs": 0.02
     }
   ]
 }
