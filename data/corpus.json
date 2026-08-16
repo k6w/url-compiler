@@ -1,0 +1,105 @@
+{
+  "name": "default-corpus",
+  "description": "Real-world style URLs used by corpus tests and benchmarks. Categories follow the benchmark categories from the product spec.",
+  "categories": [
+    {
+      "name": "short",
+      "urls": [
+        "https://x.com/jack",
+        "https://x.com/elonmusk/status/1748000000000000000",
+        "https://github.com/torvalds",
+        "https://youtube.com/@mkbhd",
+        "https://google.com",
+        "https://wikipedia.org"
+      ]
+    },
+    {
+      "name": "long-paths",
+      "urls": [
+        "https://developer.mozilla.org/en-US/docs/Web/API/URL/URL",
+        "https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=net-8.0",
+        "https://github.com/vercel/next.js/tree/canary/packages/next/src/server/base-server.ts",
+        "https://www.amazon.com/gp/product/B08N5WRWNW/ref=ox_sc_saved_title_1",
+        "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map"
+      ]
+    },
+    {
+      "name": "tracking",
+      "urls": [
+        "https://www.example.com/products/12345?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale&utm_content=banner&utm_term=running+shoes&gclid=EAIaIQobChMI",
+        "https://mystore.io/landing?fbclid=IwAR2XyZ123456789012345678901234567&utm_source=facebook",
+        "https://news.site/articles/tech/article-12345?utm_source=newsletter&utm_medium=email&utm_campaign=weekly&mc_cid=abc123&mc_eid=def456",
+        "https://shop.example.com/cart?msclkid=8f3a9b2c1d4e5f6a7b8c9d0e1f2a3b4c&utm_source=bing"
+      ]
+    },
+    {
+      "name": "api",
+      "urls": [
+        "https://api.example.com/v2/users/12345/orders?page=2&limit=50&sort=created&direction=desc&status=active",
+        "https://api.github.com/repos/vercel/next.js/issues?state=open&per_page=100&page=3",
+        "https://api.stripe.com/v1/customers/cus_ABC123XYZ?expand[0]=subscriptions&expand[1]=default_source",
+        "https://graph.microsoft.com/v1.0/me/messages?$select=subject,from&$top=25&$orderby=receivedDateTime desc"
+      ]
+    },
+    {
+      "name": "uuid",
+      "urls": [
+        "https://app.example.com/documents/3f2504e0-4f89-11d3-9a0c-0305e82c3301/edit",
+        "https://api.example.com/v1/items/f81d4fae-7dec-11d0-a765-00a0c91e6bf6?include=owner,tags",
+        "https://portal.example.com/tenants/9b2f6c8a-1d3e-4f5a-b6c7-d8e9f0a1b2c3/settings/notifications",
+        "https://tasks.example.com/boards/00000000-0000-4000-8000-000000000000/cards/550e8400-e29b-41d4-a716-446655440000"
+      ]
+    },
+    {
+      "name": "random-token",
+      "urls": [
+        "https://cdn.example.com/assets/xK9mQ2vPnR7jL4wYtZ6hF3sD8bN1cV5a.mp4",
+        "https://files.example.com/d/9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c/download",
+        "https://share.example.com/s/J8kL2mN4pQ6rS8tU0vW2xY4z",
+        "https://auth.example.com/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N65LhLJ0oRz",
+        "https://short.example.com/aB3xY9"
+      ]
+    },
+    {
+      "name": "unicode",
+      "urls": [
+        "https://ja.wikipedia.org/wiki/メインページ",
+        "https://www.example.com/파일/다운로드/보고서",
+        "https://пример.рф/документы/отчет?страница=2",
+        "https://www.example.com/search?q=café+crème",
+        "https://emoji.example.com/🎉/party/time"
+      ]
+    },
+    {
+      "name": "ecommerce",
+      "urls": [
+        "https://www.amazon.com/Sony-WH-1000XM5-Canceling-Headphones-Hands-Free/dp/B09XS7JWHH/ref=sr_1_1?keywords=sony+headphones&qid=1690000000&sr=8-1",
+        "https://www.walmart.com/ip/Restored-Apple-iPhone-13-128GB-Midnight/123456789",
+        "https://www.etsy.com/listing/1234567890/handmade-ceramic-mug?ref=user_profile",
+        "https://aliexpress.com/item/1005001234567890.html?srcSns=sns_Copy&spreadType=socialShare",
+        "https://www.ebay.com/itm/294123456789?_trkparms=amclksrc%3DITM"
+      ]
+    },
+    {
+      "name": "social",
+      "urls": [
+        "https://www.reddit.com/r/programming/comments/1abcde/title_of_post_here/",
+        "https://www.instagram.com/p/Cabcdefghij/",
+        "https://vm.tiktok.com/ZMabcdefg/",
+        "https://www.facebook.com/groups/1234567890/permalink/9876543210",
+        "https://twitter.com/nuexternal/status/1680000000000000000/photo/1"
+      ]
+    },
+    {
+      "name": "service-template",
+      "urls": [
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s",
+        "https://github.com/vercel/next.js/pull/58452",
+        "https://github.com/vercel/next.js/issues/45123",
+        "https://www.google.com/maps/place/New+York,+NY/@40.7128,-74.0060,13z",
+        "https://gist.github.com/torvalds/1234567890abcdef"
+      ]
+    }
+  ]
+}

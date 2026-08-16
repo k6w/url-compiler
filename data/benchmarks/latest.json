@@ -1,0 +1,127 @@
+{
+  "generatedAt": "2026-08-16T13:48:44.080Z",
+  "total": 49,
+  "shortenedCount": 5,
+  "categories": [
+    {
+      "category": "short",
+      "urls": 6,
+      "avgOriginal": 27,
+      "avgUltra": 42,
+      "avgUltraPayload": 20,
+      "avgHuman": 53,
+      "minUltra": 29,
+      "maxUltra": 76,
+      "encodeMs": 1.07,
+      "decodeMs": 0.01
+    },
+    {
+      "category": "long-paths",
+      "urls": 5,
+      "avgOriginal": 78,
+      "avgUltra": 98,
+      "avgUltraPayload": 76,
+      "avgHuman": 138,
+      "minUltra": 62,
+      "maxUltra": 116,
+      "encodeMs": 1.11,
+      "decodeMs": 0.02
+    },
+    {
+      "category": "tracking",
+      "urls": 4,
+      "avgOriginal": 116,
+      "avgUltra": 102,
+      "avgUltraPayload": 80,
+      "avgHuman": 143,
+      "minUltra": 80,
+      "maxUltra": 116,
+      "encodeMs": 1.26,
+      "decodeMs": 0.02
+    },
+    {
+      "category": "api",
+      "urls": 4,
+      "avgOriginal": 97,
+      "avgUltra": 106,
+      "avgUltraPayload": 84,
+      "avgHuman": 150,
+      "minUltra": 77,
+      "maxUltra": 132,
+      "encodeMs": 1.21,
+      "decodeMs": 0.02
+    },
+    {
+      "category": "uuid",
+      "urls": 4,
+      "avgOriginal": 92,
+      "avgUltra": 97,
+      "avgUltraPayload": 75,
+      "avgHuman": 136,
+      "minUltra": 85,
+      "maxUltra": 117,
+      "encodeMs": 1.77,
+      "decodeMs": 0.02
+    },
+    {
+      "category": "random-token",
+      "urls": 5,
+      "avgOriginal": 71,
+      "avgUltra": 100,
+      "avgUltraPayload": 78,
+      "avgHuman": 141,
+      "minUltra": 62,
+      "maxUltra": 182,
+      "encodeMs": 1.38,
+      "decodeMs": 0.02
+    },
+    {
+      "category": "unicode",
+      "urls": 5,
+      "avgOriginal": 39,
+      "avgUltra": 84,
+      "avgUltraPayload": 62,
+      "avgHuman": 116,
+      "minUltra": 64,
+      "maxUltra": 128,
+      "encodeMs": 1.47,
+      "decodeMs": 0.02
+    },
+    {
+      "category": "ecommerce",
+      "urls": 5,
+      "avgOriginal": 89,
+      "avgUltra": 115,
+      "avgUltraPayload": 93,
+      "avgHuman": 163,
+      "minUltra": 84,
+      "maxUltra": 173,
+      "encodeMs": 1.43,
+      "decodeMs": 0.02
+    },
+    {
+      "category": "social",
+      "urls": 5,
+      "avgOriginal": 54,
+      "avgUltra": 71,
+      "avgUltraPayload": 49,
+      "avgHuman": 98,
+      "minUltra": 50,
+      "maxUltra": 90,
+      "encodeMs": 0.99,
+      "decodeMs": 0.01
+    },
+    {
+      "category": "service-template",
+      "urls": 6,
+      "avgOriginal": 50,
+      "avgUltra": 66,
+      "avgUltraPayload": 44,
+      "avgHuman": 91,
+      "minUltra": 52,
+      "maxUltra": 92,
+      "encodeMs": 1.31,
+      "decodeMs": 0.02
+    }
+  ]
+}
