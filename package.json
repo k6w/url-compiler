@@ -11,6 +11,7 @@
     "benchmark": "bun tools/benchmark.ts",
     "dict:build": "bun tools/build-dictionary.ts",
     "dict:analyze": "bun tools/analyze-corpus.ts",
+    "golden:generate": "bun tools/generate-golden.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

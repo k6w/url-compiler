@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-16T13:48:44.080Z",
+  "generatedAt": "2026-08-16T13:56:57.944Z",
   "total": 49,
   "shortenedCount": 5,
   "categories": [
@@ -12,7 +12,7 @@
       "avgHuman": 53,
       "minUltra": 29,
       "maxUltra": 76,
-      "encodeMs": 1.07,
+      "encodeMs": 1.02,
       "decodeMs": 0.01
     },
     {
@@ -24,8 +24,8 @@
       "avgHuman": 138,
       "minUltra": 62,
       "maxUltra": 116,
-      "encodeMs": 1.11,
-      "decodeMs": 0.02
+      "encodeMs": 1.27,
+      "decodeMs": 0.03
     },
     {
       "category": "tracking",
@@ -36,7 +36,7 @@
       "avgHuman": 143,
       "minUltra": 80,
       "maxUltra": 116,
-      "encodeMs": 1.26,
+      "encodeMs": 1.36,
       "decodeMs": 0.02
     },
     {
@@ -48,8 +48,8 @@
       "avgHuman": 150,
       "minUltra": 77,
       "maxUltra": 132,
-      "encodeMs": 1.21,
-      "decodeMs": 0.02
+      "encodeMs": 1.31,
+      "decodeMs": 0.03
     },
     {
       "category": "uuid",
@@ -60,7 +60,7 @@
       "avgHuman": 136,
       "minUltra": 85,
       "maxUltra": 117,
-      "encodeMs": 1.77,
+      "encodeMs": 1.5,
       "decodeMs": 0.02
     },
     {
@@ -72,7 +72,7 @@
       "avgHuman": 141,
       "minUltra": 62,
       "maxUltra": 182,
-      "encodeMs": 1.38,
+      "encodeMs": 1.27,
       "decodeMs": 0.02
     },
     {
@@ -84,8 +84,8 @@
       "avgHuman": 116,
       "minUltra": 64,
       "maxUltra": 128,
-      "encodeMs": 1.47,
-      "decodeMs": 0.02
+      "encodeMs": 1.28,
+      "decodeMs": 0.01
     },
     {
       "category": "ecommerce",
@@ -96,7 +96,7 @@
       "avgHuman": 163,
       "minUltra": 84,
       "maxUltra": 173,
-      "encodeMs": 1.43,
+      "encodeMs": 1.4,
       "decodeMs": 0.02
     },
     {
@@ -108,8 +108,8 @@
       "avgHuman": 98,
       "minUltra": 50,
       "maxUltra": 90,
-      "encodeMs": 0.99,
-      "decodeMs": 0.01
+      "encodeMs": 0.97,
+      "decodeMs": 0.02
     },
     {
       "category": "service-template",
@@ -120,8 +120,8 @@
       "avgHuman": 91,
       "minUltra": 52,
       "maxUltra": 92,
-      "encodeMs": 1.31,
-      "decodeMs": 0.02
+      "encodeMs": 1.27,
+      "decodeMs": 0.01
     }
   ]
 }

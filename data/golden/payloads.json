@@ -1,0 +1,503 @@
+{
+  "description": "Frozen decode-contract payloads. Every entry must keep decoding to its target byte-for-byte, forever, regardless of future dictionary versions or format changes. Generated once — never regenerate over existing entries; only append via merge tooling.",
+  "generatedAt": "2026-08-16T13:55:35.435Z",
+  "dictionaryVersionAtGeneration": 0,
+  "entries": [
+    {
+      "original": "https://x.com/jack",
+      "target": "https://x.com/jack",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAvAAEBBGphY2s",
+      "human": "0002-y001-0426-mrb3-dcbw"
+    },
+    {
+      "original": "https://x.com/elonmusk/status/1748000000000000000",
+      "target": "https://x.com/elonmusk/status/1748000000000000000",
+      "format": "deflate",
+      "dictionaryVersion": 0,
+      "ultra": "gADLKCkpKLbS16_QS87P1U_Nyc_LLS3O1i8uSSwpLdY3NDexMEAFAA",
+      "human": "g00c-pa19-54mb-dmpq-nz84-qkpf-tn7w-vjef-scpj-vkpp-5wq4-jb19-5qb3-ed1q-p4r4-0180-my"
+    },
+    {
+      "original": "https://github.com/torvalds",
+      "target": "https://github.com/torvalds",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAsAAEBCHRvcnZhbGRz",
+      "human": "0002-r001-0447-8vvj-esgp-rs3k-p9"
+    },
+    {
+      "original": "https://youtube.com/@mkbhd",
+      "target": "https://youtube.com/@mkbhd",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAtAAEBBkBta2JoZA",
+      "human": "0002-t001-0434-0vbb-c9m6-8yj"
+    },
+    {
+      "original": "https://google.com",
+      "target": "https://google.com/",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAuAAA",
+      "human": "0002-w000-0"
+    },
+    {
+      "original": "https://wikipedia.org",
+      "target": "https://wikipedia.org/",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAxAAA",
+      "human": "0003-2000-r"
+    },
+    {
+      "original": "https://developer.mozilla.org/en-US/docs/Web/API/URL/URL",
+      "target": "https://developer.mozilla.org/en-US/docs/Web/API/URL/URL",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAA-AAYBBWVuLVVTOwEDV2ViAQNBUEkBA1VSTBME",
+      "human": "0003-w006-042p-avhd-an9k-p083-axjp-4083-8584-j083-an94-r4r4-8j"
+    },
+    {
+      "original": "https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=net-8.0",
+      "target": "https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=net-8.0",
+      "format": "brotli",
+      "dictionaryVersion": 0,
+      "ultra": "QAAbWQBQRLd5Xs76eqLrjvQQQgPNKQcOcd4SybPsDgeH3DJJb-eQm4dpJE5ChfWr00-WKNfi_YzrBSAWF65lUV9U0zUeaA",
+      "human": "8001-pp80-a12b-eyay-svx7-n8qb-hvt1-0gg3-smmg-e3kh-vr9c-kczc-1r3r-fq1j-95qy-f44v-gxmj-8kj2-gqtt-qmtf-jrmd-frqx-hkng-a80p-2yq6-amaz-ak9k-a7k8-sq"
+    },
+    {
+      "original": "https://github.com/vercel/next.js/tree/canary/packages/next/src/server/base-server.ts",
+      "target": "https://github.com/vercel/next.js/tree/canary/packages/next/src/server/base-server.ts",
+      "format": "brotli",
+      "dictionaryVersion": 0,
+      "ultra": "QAAbVAAQRLd5XrnzVhlVRIdakAdcfJgTrRAjYsAGnGDztgwy2vMxjT5rXGv5Yzg3_CsrUUHC9Wh8jIUWMhyBgmmygVIJ",
+      "human": "8001-pn00-212b-eyay-q7sn-c6an-8j3n-n407-bhy9-g4xd-20hp-5g06-khgf-7dgc-6bdf-6ccd-7snn-rtzs-ccw3-fz1b-5d8m-3gqn-d1y8-s18p-68e8-30k9-pa0n-428t-q"
+    },
+    {
+      "original": "https://www.amazon.com/gp/product/B08N5WRWNW/ref=ox_sc_saved_title_1",
+      "target": "https://www.amazon.com/gp/product/B08N5WRWNW/ref=ox_sc_saved_title_1",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAiAAQBAmdwIwEKQjA4TjVXUldOVwEXcmVmPW94X3NjX3NhdmVkX3RpdGxlXzE",
+      "human": "0002-4004-0416-ew13-0454-4c1r-9rtn-emjq-9sbg-25vj-cnk3-tvvr-bxsp-6qvk-c5v6-as2z-ehmq-8v35-bwrg-qr"
+    },
+    {
+      "original": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map",
+      "target": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map",
+      "format": "brotli",
+      "dictionaryVersion": 0,
+      "ultra": "QAAbWQDgBWJzFJNeCyJG2WPcAzrlwCFIakFgkR3cDh6ylu0XBedzKS1YfYHnp664sd9qoiZ7oVB7QUOZqs1iapzxAQ",
+      "human": "8001-pp80-w02p-4wrm-jdf0-p8j6-v5hx-r0st-wq02-2j3a-85g9-27ew-1rfb-55qd-2w2y-ews9-5nc7-v0f7-myqb-hcez-dah2-cyx1-a1xm-2gws-nb6p-4tmw-y40g-e2"
+    },
+    {
+      "original": "https://www.example.com/products/12345?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale&utm_content=banner&utm_term=running+shoes&gclid=EAIaIQobChMI",
+      "target": "https://www.example.com/products/12345?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale&utm_content=banner&utm_term=running+shoes&gclid=EAIaIQobChMI",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgnAAIiCPLAAQYjJiQ3JQELc3ByaW5nX3NhbGUmAQZiYW5uZXInAQ1ydW5uaW5nK3Nob2VzBloBDEVBSWFJUW9iQ2hNSQ",
+      "human": "0042-e002-484f-5g01-0rhj-c91q-4m0g-pwvg-e9mp-wstz-edgp-rs96-0436-4rbe-dsjq-49r1-1ns7-avke-d5q6-eavk-d1qp-awr6-b80g-rha1-95gm-jmbf-c91p-gka9-vh"
+    },
+    {
+      "original": "https://mystore.io/landing?fbclid=IwAR2XyZ123456789012345678901234567&utm_source=facebook",
+      "target": "https://mystore.io/landing?fbclid=IwAR2XyZ123456789012345678901234567&utm_source=facebook",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgBB215c3RvcmUEAwABAQdsYW5kaW5nAgZbASNJd0FSMlh5WjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2NyMo",
+      "human": "0040-21vd-f5sq-8vvj-cm20-6001-043p-rrbe-chmp-wsr2-0sdg-28t9-ex0n-4cjr-f5d3-2chk-6gtk-cdsr-74r3-2chk-6gtk-cdsr-74r3-2chk-6gtk-cds3-50hs"
+    },
+    {
+      "original": "https://news.site/articles/tech/article-12345?utm_source=newsletter&utm_medium=email&utm_campaign=weekly&mc_cid=abc123&mc_eid=def456",
+      "target": "https://news.site/articles/tech/article-12345?utm_source=newsletter&utm_medium=email&utm_campaign=weekly&mc_cid=abc123&mc_eid=def456",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgDEAQlAAMFPAEEdGVjaAENYXJ0aWNsZS0xMjM0NQUjLyQuJQEGd2Vla2x5Bl4KA6vBIwZfCgPe9FY",
+      "human": "0040-6404-4m00-619w-0427-8sb3-d00g-trbj-ehmp-6v35-5mrk-4csm-6m2j-6bs4-5rjg-21kq-cnjp-pv3s-0sf0-m0xb-r4hg-cqra-0fff-8ngv-s"
+    },
+    {
+      "original": "https://shop.example.com/cart?msclkid=8f3a9b2c1d4e5f6a7b8c9d0e1f2a3b4c&utm_source=bing",
+      "target": "https://shop.example.com/cart?msclkid=8f3a9b2c1d4e5f6a7b8c9d0e1f2a3b4c&utm_source=bing",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgDCAEHZXhhbXBsZQQAAAEFKQIGXAoQjzqbLB1OX2p7jJ0OHyo7TCMHYQ",
+      "human": "0040-6201-0xjq-grbd-e1p6-a100-000g-aa82-0se0-m44f-7adj-r7ae-bxn7-q34x-1rfj-metc-4c3p-266"
+    },
+    {
+      "original": "https://api.example.com/v2/users/12345/orders?page=2&limit=50&sort=created&direction=desc&status=active",
+      "target": "https://api.example.com/v2/users/12345/orders?page=2&limit=50&sort=created&direction=desc&status=active",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgDAQEHZXhhbXBsZQQAAAQ_KAjywAEFLAUiQigIZCoHJgY-PgZAB3g",
+      "human": "0040-6081-0xjq-grbd-e1p6-a100-0023-ya08-yb00-219c-0mh4-4a08-cgn0-e9g6-7rz0-cg07-f00t"
+    },
+    {
+      "original": "https://api.github.com/repos/vercel/next.js/issues?state=open&per_page=100&page=3",
+      "target": "https://api.github.com/repos/vercel/next.js/issues?state=open&per_page=100&page=3",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgDAQEGZ2l0aHViBAAABAEFcmVwb3MBBnZlcmNlbAEHbmV4dC5qcy0DPQdVBi4IyAEiQw",
+      "human": "0040-6081-0skp-jx38-enh0-8000-0g0g-awk5-e1qq-6086-esjq-4rv5-dg0g-evk5-f1t2-wtkk-5m1k-t1tn-0rq0-hj01-491g-zh"
+    },
+    {
+      "original": "https://api.stripe.com/v1/customers/cus_ABC123XYZ?expand[0]=subscriptions&expand[1]=default_source",
+      "target": "https://api.stripe.com/v1/customers/cus_ABC123XYZ?expand[0]=subscriptions&expand[1]=default_source",
+      "format": "brotli",
+      "dictionaryVersion": 0,
+      "ultra": "QAAbYQDAxNq5bT_-O2YJywLpMxhs6otOTg_K306_xnliEUaeA455gMECtc6Xzn6XbTifIv0hsxKf5lLhQ-sjmZzpVgxQRiwg0agl",
+      "human": "8001-pr80-r32d-nebd-7zz3-psg9-sc1e-jcrr-dkn8-pkje-1z5d-yknz-rswp-44a6-kr1r-wyc0-r41b-bkmq-ssz9-ev9r-kwhf-t8dk-2afy-cmq1-8fnj-76cw-x5b0-rm26-5ggd-3a15-q9"
+    },
+    {
+      "original": "https://graph.microsoft.com/v1.0/me/messages?$select=subject,from&$top=25&$orderby=receivedDateTime desc",
+      "target": "https://graph.microsoft.com/v1.0/me/messages?$select=subject,from&$top=25&$orderby=receivedDateTime%20desc",
+      "format": "brotli",
+      "dictionaryVersion": 0,
+      "ultra": "QAAbaQDg5W17R12hJjSl0zoFzqghQTo5cPh2-PYlURBE0BZzyBxrURmYz8_Ppbx0HgwDYr3KKjvEmR1g9gKV8Icgz3VrBHG9vsNnzAxmoeloAA",
+      "human": "8001-pt80-w3jp-tyt7-bpgj-cd55-tcx0-bkn8-450k-mebg-z1vf-hxh5-a484-9m0p-ef41-rtth-36cc-zkyf-mpy7-87gc-0dhb-vjha-7f29-j7b0-yr19-bw47-437q-atr4-e6yv-xgv7-sg66-d8f9-d000-yh"
+    },
+    {
+      "original": "https://app.example.com/documents/3f2504e0-4f89-11d3-9a0c-0305e82c3301/edit",
+      "target": "https://app.example.com/documents/3f2504e0-4f89-11d3-9a0c-0305e82c3301/edit",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAADAgEHZXhhbXBsZQQAAAMBCWRvY3VtZW50cwk_JQTgT4kR05oMAwXoLDMBBTE",
+      "human": "0000-60g1-0xjq-grbd-e1p6-a100-001g-22b4-dxhq-avb5-dst7-629z-4m2e-0kw9-279s-m303-0qm2-rcr1-0mrg-p2"
+    },
+    {
+      "original": "https://api.example.com/v1/items/f81d4fae-7dec-11d0-a765-00a0c91e6bf6?include=owner,tags",
+      "target": "https://api.example.com/v1/items/f81d4fae-7dec-11d0-a765-00a0c91e6bf6?include=owner,tags",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgDAQEHZXhhbXBsZQQAAAM-JQn4HU-ufewR0KdlAKDJHmv2AQEHaW5jbHVkZQEKb3duZXIsdGFncw",
+      "human": "0040-6081-0xjq-grbd-e1p6-a100-001k-w989-z0em-zbkx-xg8x-19v5-02gc-j7kb-yr0g-21v9-dshp-rxb4-cm0g-mvvq-dsjq-4b3m-c5kq-6sd"
+    },
+    {
+      "original": "https://portal.example.com/tenants/9b2f6c8a-1d3e-4f5a-b6c7-d8e9f0a1b2c3/settings/notifications",
+      "target": "https://portal.example.com/tenants/9b2f6c8a-1d3e-4f5a-b6c7-d8e9f0a1b2c3/settings/notifications",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAADEwEHZXhhbXBsZQQAAAQBB3RlbmFudHMJmy9sih0-T1q2x9jp8KGywwUjBaoB",
+      "human": "0000-64r1-0xjq-grbd-e1p6-a100-0020-21vm-cnq6-2vkm-ec4s-pbvc-h8ek-wktt-pv3x-htfg-m6sc-6193-0pn0-2gd"
+    },
+    {
+      "original": "https://tasks.example.com/boards/00000000-0000-4000-8000-000000000000/cards/550e8400-e29b-41d4-a716-446655440000",
+      "target": "https://tasks.example.com/boards/00000000-0000-4000-8000-000000000000/cards/550e8400-e29b-41d4-a716-446655440000",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABBXRhc2tzAQdleGFtcGxlBAAABAEGYm9hcmRzCQAAAAAAAEAAgAAAAAAAAAABBWNhcmRzCVUOhADim0HUpxZEZlVEAAA",
+      "human": "0000-21bm-c5sp-pwr1-0xjq-grbd-e1p6-a100-0020-21k2-dxgq-4s3k-1400-0000-0004-0040-0000-0000-0000-21b3-c5s6-8wr9-am78-8072-kd0x-99rp-8hk5-ah00-00m3"
+    },
+    {
+      "original": "https://cdn.example.com/assets/xK9mQ2vPnR7jL4wYtZ6hF3sD8bN1cV5a.mp4",
+      "target": "https://cdn.example.com/assets/xK9mQ2vPnR7jL4wYtZ6hF3sD8bN1cV5a.mp4",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAADBgEHZXhhbXBsZQQAAAIFTwEkeEs5bVEydlBuUjdqTDR3WXRaNmhGM3NEOGJOMWNWNWEubXA0",
+      "human": "0000-61g1-0xjq-grbd-e1p6-a100-0010-akr1-4hw4-pebd-a4s7-cm3e-a8vp-mk1m-excq-8php-d133-6wt4-71h4-wcb3-artp-2bkd-e0t0-yk"
+    },
+    {
+      "original": "https://files.example.com/d/9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c/download",
+      "target": "https://files.example.com/d/9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c/download",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAADNgEHZXhhbXBsZQQAAAMFfAoQn459bFtKPy4dDJuKf25dTAVB",
+      "human": "0000-6dg1-0xjq-grbd-e1p6-a100-001g-az0a-22fr-wzbc-bd53-ybgx-1jdr-mzve-bn60-ag8j-t"
+    },
+    {
+      "original": "https://share.example.com/s/J8kL2mN4pQ6rS8tU0vW2xY4z",
+      "target": "https://share.example.com/s/J8kL2mN4pQ6rS8tU0vW2xY4z",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAADOAEHZXhhbXBsZQQAAAIBAXMBGEo4a0wybU40cFE2clM4dFUwdlcyeFk0eg",
+      "human": "0000-6e01-0xjq-grbd-e1p6-a100-0010-20bk-04c4-me3b-9gs6-tkhm-e18k-cwjk-71t5-ac3p-aws7-gp9m-f84m"
+    },
+    {
+      "original": "https://auth.example.com/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N65LhLJ0oRz",
+      "target": "https://auth.example.com/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N65LhLJ0oRz",
+      "format": "brotli",
+      "dictionaryVersion": 0,
+      "ultra": "QAAbhgDgFaHSD9w1bgG-Sx7rAXjAVYt6p9qEP7MEqVesXE80l3p6PbeEUo4gJJPtSF_9cDuHi12-Q2j_QGc7eMC54hcuCHC4Dp2LMhH8lz0U-Kb7lMqakc29w6cHilhe_vtNdv8VHLL77pRFR-rDZwKfbBOkLtUf",
+      "human": "8001-q1g0-w0at-3mgf-vgtp-w0dy-9cfe-p0br-r1ar-pyn7-va23-zcr4-n5bt-rq2f-6jbq-myhx-py25-53h0-4j9y-tj2z-znr3-q1wb-bpz4-6t7z-81kk-py60-q7h1-ebg8-e2w0-x7cb-688z-s5sx-2kwa-dywm-sad9-3kdx-rekg-f2jr-bvzf-pkbp-zwah-scqv-xta4-ahza-rdkg-57vc-2ej2-xn8z-w1"
+    },
+    {
+      "original": "https://short.example.com/aB3xY9",
+      "target": "https://short.example.com/aB3xY9",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABBXNob3J0AQdleGFtcGxlBAAAAQEGYUIzeFk5",
+      "human": "0000-21bk-d1qq-4x01-0xjq-grbd-e1p6-a100-000g-21k1-88sq-gp9s-1e"
+    },
+    {
+      "original": "https://ja.wikipedia.org/wiki/メインページ",
+      "target": "https://ja.wikipedia.org/wiki/%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%9A%E3%83%BC%E3%82%B8",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAADJAEJd2lraXBlZGlhBAEAAgVeARLjg6HjgqTjg7Pjg5rjg7zjgrg",
+      "human": "0000-6901-15vp-jtv9-e1jp-8tb1-0g0g-00g5-br0h-5rw3-m7hr-5973-gesy-70wt-we1v-srw2-q00j"
+    },
+    {
+      "original": "https://www.example.com/파일/다운로드/보고서",
+      "target": "https://www.example.com/%ED%8C%8C%EC%9D%BC/%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C/%EB%B3%B4%EA%B3%A0%EC%84%9C",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAnAAMBBu2MjOydvAEM64uk7Jq066Gc65OcAQnrs7Tqs6DshJw",
+      "human": "0002-e003-043e-v34c-xjev-r08c-xe5t-9v4t-pknt-377b-jee0-22fb-pete-ncx0-xj29-r8d"
+    },
+    {
+      "original": "https://пример.рф/документы/отчет?страница=2",
+      "target": "https://xn--e1afmkfd.xn--p1ai/%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/%D0%BE%D1%82%D1%87%D0%B5%D1%82?%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0=2",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgBFXhuLS1lMWFmbWtmZC54bi0tcDFhaQACARLQtNC-0LrRg9C80LXQvdGC0YsBCtC-0YLRh9C10YIBARDRgdGC0YDQsNC90LjRhtCwQg",
+      "human": "0040-25br-drpj-ts9h-c5k6-ttv6-cgq7-gvhd-5nr3-2rb9-0010-24pg-pk8b-xm5t-t61x-1f6g-pq8b-vmc2-t65g-22pg-qv8r-5mc7-t2tx-30g1-048d-30eh-gb8r-1m5g-t2yx-1e6h-gv8b-0ggv-2"
+    },
+    {
+      "original": "https://www.example.com/search?q=café+crème",
+      "target": "https://www.example.com/search?q=caf%C3%A9+cr%C3%A8me",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgnAAEFLQEgARRjYWYlQzMlQTkrY3IlQzMlQThtZQ",
+      "human": "0042-e001-0mpg-2801-2hhp-2sh5-8csj-ag9s-5dhq-49a3-6cjm-2e3d-cme1"
+    },
+    {
+      "original": "https://emoji.example.com/🎉/party/time",
+      "target": "https://emoji.example.com/%F0%9F%8E%89/party/time",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABBWVtb2ppAQdleGFtcGxlBAAAAwEE8J-OiQEFcGFydHkBBHRpbWU",
+      "human": "0000-21b5-dnqp-mt81-0xjq-grbd-e1p6-a100-001g-217g-ky78-j085-e1gq-4x3s-0427-8tbd-cmcv"
+    },
+    {
+      "original": "https://www.amazon.com/Sony-WH-1000XM5-Canceling-Headphones-Hands-Free/dp/B09XS7JWHH/ref=sr_1_1?keywords=sony+headphones&qid=1690000000&sr=8-1",
+      "target": "https://www.amazon.com/Sony-WH-1000XM5-Canceling-Headphones-Hands-Free/dp/B09XS7JWHH/ref=sr_1_1?keywords=sony+headphones&qid=1690000000&sr=8-1",
+      "format": "brotli",
+      "dictionaryVersion": 0,
+      "ultra": "QAAbjQBA5GBerc03EMkNeim9Tg4cfvj-eZ5wEoi3PGWhmSrgb1YBjAxmVOPyhz4FjmXZoZIgmJ_rfr88T5Du83adgXGVYVL0YLY347PaUCt5n6bMdz-s33fkRs5J1taDFXmWT-Rz2SxO1lgKEbSlAgc",
+      "human": "8001-q380-83j6-0qnd-smvh-1j8d-f8mv-tkge-3hzf-hzks-ksr1-525q-7hjt-369a-w1qn-c0cc-1hk5-9rzj-gwz0-b3k5-v6gs-484r-kznq-xfsw-9y8e-xwvp-kp0q-35b1-abt6-1dhq-wesx-mm1b-f6ft-dk3q-7ypd-yxz4-8v74-knpp-gcaq-k5jf-whsx-jb2e-tsc0-m4dm-mm10-enq"
+    },
+    {
+      "original": "https://www.walmart.com/ip/Restored-Apple-iPhone-13-128GB-Midnight/123456789",
+      "target": "https://www.walmart.com/ip/Restored-Apple-iPhone-13-128GB-Midnight/123456789",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAqAAMBAmlwASdSZXN0b3JlZC1BcHBsZS1pUGhvbmUtMTMtMTI4R0ItTWlkbmlnaHQIqrTedQ",
+      "human": "0002-m003-0416-jw01-4x96-awvm-dxs6-as1d-85r7-0v35-5nmn-0t3f-dsjj-tc9k-5mrk-4e27-88pm-ttb4-dsmp-et3m-12nb-9qkn-tp"
+    },
+    {
+      "original": "https://www.etsy.com/listing/1234567890/handmade-ceramic-mug?ref=user_profile",
+      "target": "https://www.etsy.com/listing/1234567890/handmade-ceramic-mug?ref=user_profile",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgpAAMBB2xpc3RpbmcIpIuwmQkBFGhhbmRtYWRlLWNlcmFtaWMtbXVnAS4BDHVzZXJfcHJvZmlsZQ",
+      "human": "0042-j003-043p-rtbk-ehmp-wsr8-mj5v-1689-04a6-grbe-chpp-2s35-5nhp-awk1-dnmp-6bbd-enkg-2bg1-1htq-6sbj-bxr7-4vv6-d5p6-a52"
+    },
+    {
+      "original": "https://aliexpress.com/item/1005001234567890.html?srcSns=sns_Copy&spreadType=socialShare",
+      "target": "https://aliexpress.com/item/1005001234567890.html?srcSns=sns_Copy&spreadType=socialShare",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgCTwACJAEVMTAwNTAwMTIzNDU2Nzg5MC5odG1sAgEGc3JjU25zAQhzbnNfQ29weQEKc3ByZWFkVHlwZQELc29jaWFsU2hhcmU",
+      "human": "0040-4kr0-08j0-259h-60r3-ac1g-64s3-6d1n-6rvk-ge9g-5sm7-8vbc-080g-cwvj-cd9p-wwr1-11sp-wwtz-8dqq-0y81-19sq-0wk5-c5j5-8ybg-cm0g-pwvf-cdmp-2v2k-d1gq-4s8v-d"
+    },
+    {
+      "original": "https://www.ebay.com/itm/294123456789?_trkparms=amclksrc%3DITM",
+      "target": "https://www.ebay.com/itm/294123456789?_trkparms=amclksrc%3DITM",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgoAAIBA2l0bQoGKUEjRWeJAQEJX3Rya3Bhcm1zAQ5hbWNsa3NyYyUzRElUTQ",
+      "human": "0042-g002-041p-jx3d-1832-jg93-8nkr-j081-15fq-8wkb-e1gq-4vbk-0476-2vb3-dhnq-6wk3-4msm-8jam-9mp2"
+    },
+    {
+      "original": "https://www.reddit.com/r/programming/comments/1abcde/title_of_post_here/",
+      "target": "https://www.reddit.com/r/programming/comments/1abcde/title_of_post_here/",
+      "format": "brotli",
+      "dictionaryVersion": 0,
+      "ultra": "QAAbRwBABOpkMd7EZPgPqoENOGAPh03GabA9YOxsegaIs7Qf5o-uDbqI6pEh57LoKg0I",
+      "human": "8001-phr0-802e-ms1h-vv26-9y0f-na0g-te30-1y3m-vhk9-p0yp-1v3c-f838-hcxm-3zk8-zbgd-qa4e-n491-wyse-gagd-10qe"
+    },
+    {
+      "original": "https://www.instagram.com/p/Cabcdefghij/",
+      "target": "https://www.instagram.com/p/Cabcdefghij/",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAlAAMmAQtDYWJjZGVmZ2hpagEA",
+      "human": "0002-a003-4r0g-pgv1-c9hp-8sb6-cxm6-jtg1-00mn"
+    },
+    {
+      "original": "https://vm.tiktok.com/ZMabcdefg/",
+      "target": "https://vm.tiktok.com/ZMabcdefg/",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABAnZtAQZ0aWt0b2sEAAACAQlaTWFiY2RlZmcBAA",
+      "human": "0000-20kp-dm0g-cx39-ddt6-ytr4-0000-4089-b96p-2rk3-chjp-csr1-00ac"
+    },
+    {
+      "original": "https://www.facebook.com/groups/1234567890/permalink/9876543210",
+      "target": "https://www.facebook.com/groups/1234567890/permalink/9876543210",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAmAAQFogEIpIuwmQkBCXBlcm1hbGluawoFmHZUMhA",
+      "human": "0002-c004-0ph0-2254-her9-j281-15r6-awkd-c5p6-jvkb-182s-gxjm-6880-dj"
+    },
+    {
+      "original": "https://twitter.com/nuexternal/status/1680000000000000000/photo/1",
+      "target": "https://twitter.com/nuexternal/status/1680000000000000000/photo/1",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAA2AAUBCm51ZXh0ZXJuYWwBBnN0YXR1cwETMTY4MDAwMDAwMDAwMDAwMDAwMAVKQQ",
+      "human": "0003-c005-0456-wxb5-f1t6-awke-c5p0-21kk-ehgq-8xbk-049k-2dhr-60r3-0c1g-60r3-0c1g-60r3-0c1g-602m-mg8w-g"
+    },
+    {
+      "original": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "target": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAggAAEgAQYzAQtkUXc0dzlXZ1hjUQ",
+      "human": "0042-0001-400g-ccr1-1dj5-2xsm-ewwn-estr-cd8g-mg"
+    },
+    {
+      "original": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s",
+      "target": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAggAAEgAgYzAQtkUXc0dzlXZ1hjUQY0AQM0MnM",
+      "human": "0042-0001-4010-ccr1-1dj5-2xsm-ewwn-estr-cd8g-cd01-0ct3-4wr8-f"
+    },
+    {
+      "original": "https://github.com/vercel/next.js/pull/58452",
+      "target": "https://github.com/vercel/next.js/pull/58452",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAsAAQBBnZlcmNlbAEHbmV4dC5qcy8IqJEH",
+      "human": "0002-r004-0437-csbj-cdjp-r087-dsjq-gx1e-d9sj-y258-j43g-6p"
+    },
+    {
+      "original": "https://github.com/vercel/next.js/issues/45123",
+      "target": "https://github.com/vercel/next.js/issues/45123",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAsAAQBBnZlcmNlbAEHbmV4dC5qcy0IhsEF",
+      "human": "0002-r004-0437-csbj-cdjp-r087-dsjq-gx1e-d9sj-t246-r42g-ag"
+    },
+    {
+      "original": "https://www.google.com/maps/place/New+York,+NY/@40.7128,-74.0060,13z",
+      "target": "https://www.google.com/maps/place/New+York,+NY/@40.7128,-74.0060,13z",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAAhAAQFlwEBBXBsYWNlAQxOZXcrWW9yaywrTlkBFUA0MC43MTI4LC03NC4wMDYwLDEzeg",
+      "human": "0002-2004-0pbg-2085-e1p6-2rv5-0464-wsbq-5dcp-ywkb-5gnm-wp81-2n03-8c1e-6wrk-4e1c-5mvk-8bhg-60v3-0b1h-6dx0-87"
+    },
+    {
+      "original": "https://gist.github.com/torvalds/1234567890abcdef",
+      "target": "https://gist.github.com/torvalds/1234567890abcdef",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABBGdpc3QBBmdpdGh1YgQAAAIBCHRvcnZhbGRzCggSNFZ4kKvN7w",
+      "human": "0000-2137-d5sq-8086-cxmq-8t3n-c820-0002-0447-8vvj-esgp-rs3k-1841-4d2p-f28a-qkff-f0"
+    },
+    {
+      "original": "https://www.example.com/products/12345?utm_source=google&id=7",
+      "target": "https://www.example.com/products/12345?utm_source=google&id=7",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgnAAIiCPLAAQIjJiFH",
+      "human": "0042-e002-484f-5g01-08hj-c8a7-e2"
+    },
+    {
+      "original": "https://example.com/?a=1&a=2&flag&empty=",
+      "target": "https://example.com/?a=1&a=2&flag&empty=",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAgBB2V4YW1wbGUEAAAABAEBYUEBAWFCAQRmbGFnDQEFZW1wdHkBAA",
+      "human": "0040-21v5-f1gp-tw3c-cm20-0000-0g0g-2ra1-040p-2gg1-0hk6-rrb7-1m0g-asbd-e1t7-j080-j0"
+    },
+    {
+      "original": "https://example.com/page#section",
+      "target": "https://example.com/page#section",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "ABABB2V4YW1wbGUEAAABBTUQB3NlY3Rpb24",
+      "human": "0080-21v5-f1gp-tw3c-cm20-0001-0mth-01vk-cnhq-8tbf-drnd"
+    },
+    {
+      "original": "https://example.com/page#",
+      "target": "https://example.com/page#",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "ABABB2V4YW1wbGUEAAABBTUQAA",
+      "human": "0080-21v5-f1gp-tw3c-cm20-0001-0mth-000b-y"
+    },
+    {
+      "original": "https://example.com/?#",
+      "target": "https://example.com/?#",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "ABgBB2V4YW1wbGUEAAAAABAA",
+      "human": "00c0-21v5-f1gp-tw3c-cm20-0000-0080-0em"
+    },
+    {
+      "original": "http://neverssl.com/this-page",
+      "target": "http://neverssl.com/this-page",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAEBCG5ldmVyc3NsBAAAAQEJdGhpcy1wYWdl",
+      "human": "000g-223e-cnv6-awkk-edp0-8000-040g-jx38-d5sj-tw31-cxjg-90"
+    },
+    {
+      "original": "https://user:secretpw@example.com/path?x=1",
+      "target": "https://user:secretpw@example.com/path?x=1",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAwBB2V4YW1wbGUEAAARBHVzZXISCHNlY3JldHB3AQEEcGF0aAEBAXhB",
+      "human": "0060-21v5-f1gp-tw3c-cm20-000h-0htq-6sbj-2847-6sb3-e9jq-8w3q-040g-8w31-ehm0-2081-f10g-j6"
+    },
+    {
+      "original": "https://[::1]:8080/ipv6",
+      "target": "https://[::1]:8080/ipv6",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAIBBVs6OjFdAA-QPwEBBGlwdjY",
+      "human": "0010-21av-78x3-2q80-1y83-y081-0hmq-0xhp-mt"
+    },
+    {
+      "original": "https://example.com/items/3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      "target": "https://example.com/items/3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABB2V4YW1wbGUEAAACJQk_JQTgT4kR05oMAwXoLDMB",
+      "human": "0000-21v5-f1gp-tw3c-cm20-0002-4m4k-y984-w17r-j4ek-k860-61f8-5gsg-2wr"
+    },
+    {
+      "original": "https://example.com/same/same/same/same",
+      "target": "https://example.com/same/same/same/same",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABB2V4YW1wbGUEAAAEAQRzYW1lDgM",
+      "human": "0000-21v5-f1gp-tw3c-cm20-0004-0427-6rbd-cm70-6ps"
+    },
+    {
+      "original": "https://example.com/num/2147483647",
+      "target": "https://example.com/num/2147483647",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABB2V4YW1wbGUEAAACAQNudW0I_v___w8",
+      "human": "0000-21v5-f1gp-tw3c-cm20-0002-041p-wxbd-13zf-zzzz-1wm9"
+    },
+    {
+      "original": "https://example.com/a%2Fb/%41",
+      "target": "https://example.com/a%2Fb/A",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABB2V4YW1wbGUEAAACAQVhJTJGYgEBQQ",
+      "human": "0000-21v5-f1gp-tw3c-cm20-0002-042p-299j-8sh0-20a1-d6"
+    },
+    {
+      "original": "https://пример.рф/документы",
+      "target": "https://xn--e1afmkfd.xn--p1ai/%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B",
+      "format": "specialized",
+      "dictionaryVersion": 0,
+      "ultra": "AAABFXhuLS1lMWFmbWtmZC54bi0tcDFhaQABARLQtNC-0LrRg9C80LXQvdGC0Ys",
+      "human": "0000-25br-drpj-ts9h-c5k6-ttv6-cgq7-gvhd-5nr3-2rb9-000g-24pg-pk8b-xm5t-t61x-1f6g-pq8b-vmc2-t65g-hk"
+    }
+  ]
+}
