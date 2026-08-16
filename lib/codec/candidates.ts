@@ -4,6 +4,8 @@ import { validateModelLimits } from "../url/validate"
 import { toUrl } from "../url/model"
 import { DictionaryVersionError, getDictionaries, isSupportedDictionaryVersion, supportedDictionaryVersions } from "../dictionaries/version"
 import { decodeSpecialized, encodeSpecialized } from "./specialized"
+import { huffmanV1 } from "./huffman"
+import { BitReader } from "./bit"
 import { brotliCompress, brotliDecompressToString } from "./brotli"
 import { deflateCompress, deflateDecompressToString } from "./deflate"
 import { ByteWriter } from "./writer"
@@ -63,8 +65,14 @@ export async function decodePayloadBytes(bytes: Uint8Array): Promise<DecodedPayl
   const r = new ByteReader(bytes)
   const b0 = r.readByte()
   const fmt = parseFormatByte(b0)
-  if (fmt === null || fmt.version !== 0) {
+  if (fmt === null) {
     throw new DecodeError("UNKNOWN_FORMAT", `unsupported format byte: 0x${b0.toString(16)}`)
+  }
+  if (fmt.family !== "specialized" && fmt.version !== 0) {
+    throw new DecodeError("UNKNOWN_FORMAT", `unsupported ${fmt.family} format version: ${fmt.version}`)
+  }
+  if (fmt.family === "specialized" && fmt.version > 1) {
+    throw new DecodeError("UNKNOWN_FORMAT", `unsupported specialized format version: ${fmt.version}`)
   }
   const flags = r.readByte()
   if (flags & FLAG_ENCRYPTION) {
@@ -85,7 +93,8 @@ export async function decodePayloadBytes(bytes: Uint8Array): Promise<DecodedPayl
       }
       throw e
     }
-    const model = decodeSpecialized(r, flags, set)
+    const reader = fmt.version === 1 ? (new BitReader(r.rest(), huffmanV1()) as never) : r
+    const model = decodeSpecialized(reader, flags, set)
     return { target: toUrl(model), family: fmt.family, formatVersion: fmt.version, dictionaryVersion }
   }
 
@@ -148,9 +157,10 @@ export async function encodeUrl(input: string, options: EncodeOptions = {}): Pro
   const dictVersion = resolveDictionaryVersion(options.dictVersion ?? config.activeDictionaryVersion)
 
   const drafts: PayloadCandidate[] = [
-    { format: "specialized", bytes: encodeSpecialized(model, dictVersion), canonical },
-    { format: "brotli", bytes: compressFamilyPayload("brotli", canonical), canonical },
-    { format: "deflate", bytes: compressFamilyPayload("deflate", canonical), canonical },
+    { format: "specialized", version: 0, bytes: encodeSpecialized(model, dictVersion), canonical },
+    { format: "specialized", version: 1, bytes: encodeSpecialized(model, dictVersion, { huffman: huffmanV1() }), canonical },
+    { format: "brotli", version: 0, bytes: compressFamilyPayload("brotli", canonical), canonical },
+    { format: "deflate", version: 0, bytes: compressFamilyPayload("deflate", canonical), canonical },
   ]
 
   const candidates: PayloadCandidate[] = []
@@ -171,7 +181,8 @@ export async function encodeUrl(input: string, options: EncodeOptions = {}): Pro
   candidates.sort(
     (a, b) =>
       a.bytes.length - b.bytes.length ||
-      FAMILY_PREFERENCE.indexOf(a.format) - FAMILY_PREFERENCE.indexOf(b.format),
+      FAMILY_PREFERENCE.indexOf(a.format) - FAMILY_PREFERENCE.indexOf(b.format) ||
+      a.version - b.version,
   )
   const best = candidates[0]
 

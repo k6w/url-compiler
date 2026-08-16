@@ -41,9 +41,11 @@ already-compact URLs may grow — the UI and API report an explicit warning with
 
 ```text
 byte 0   format/version:
-           00xxxxxx  specialized URL bytecode (version 0)
-           01xxxxxx  Brotli-compressed canonical URL
-           10xxxxxx  DEFLATE-compressed canonical URL
+           00xxxxxx  specialized URL bytecode
+                      version 0: raw literals
+                      version 1: canonical-Huffman literals (bit-packed stream)
+           01xxxxxx  Brotli-compressed canonical URL (version 0)
+           10xxxxxx  DEFLATE-compressed canonical URL (version 0)
            11xxxxxx  reserved (encrypted variants)
 byte 1   flags:
            bit 0 http (HTTPS implicit)    bit 4 fragment present
@@ -51,7 +53,7 @@ byte 1   flags:
            bit 2 credentials present      bit 6 checksum present (reserved)
            bit 3 query present            bit 7 encryption present (rejected in decode)
 [dict version varint]  if bit 5
-[instruction stream]
+[instruction stream]   byte-aligned (v0) or MSB-first bit-packed (v1)
 ```
 
 Instruction stream: host section (`HOST_FULL` / labels + `SUFFIX` / literal, terminated by `END`),
@@ -62,6 +64,17 @@ Inline ranges: `0x20–0x3F` = context-dependent `DICTIONARY_0..31`, `0x40–0x5
 Varints are LEB128, ≤5 bytes, minimal (overlong encodings rejected). All reads are bounds-checked;
 truncated streams, invalid opcodes, out-of-range dictionary ids, non-UTF-8 literals, and
 decompression output over 64 KiB are rejected with typed `DecodeError`s.
+
+### Format v1: Huffman literals
+
+In v1 the instruction stream is bit-packed (MSB-first). Opcodes, varints, and typed values still
+occupy 8-bit groups; only `LITERAL_BYTES` content is coded with a frozen canonical Huffman table
+(`data/dictionaries/huffman-v1.json`, 111 symbols + escape, avg 5.84 bits/byte). Bytes outside the
+table use an escape code (9 bits + 8 raw bits), so every input remains encodable. Credentials and
+fragments stay raw. The table is immutable — any change requires format version 2. v0 and v1 are
+emitted as competing candidates; each is verified round-trip and the shortest complete URL wins, so
+escape-heavy inputs (e.g. some Unicode content) simply keep their v0 encoding. Measured:
+-5–17% payload on every benchmark category vs v0, zero effect on v0 payloads (golden tests).
 
 ## Modes
 
@@ -106,10 +119,9 @@ next version and refuses to touch existing files.
 - **Zstandard**: benchmarked with raw-content dictionary (`bun tools/zstd-bench.ts`) — loses to
   both on every category (frame overhead dominates at URL scale, dictionary gives zero gain).
   Rejected; not wired into candidates.
-- **Huffman literals**: spike (`bun tools/huffman-spike.ts`, report in `data/analysis/`) measured
-  a **15% total-payload ceiling** (literals are 57.6% of the stream, 26.1% literal shrink) —
-  above the 8% gate. Scheduled as the next format work (specialized format v1, canonical code
-  tables per dictionary version).
+- **Huffman literals**: implemented as specialized format v1 (spike predicted ~15%, delivered
+  -5–17% per category). Frozen table in `data/dictionaries/huffman-v1.json`; regenerating requires
+  format version 2 (`bun tools/build-huffman.ts` documents the freeze).
 
 ## Security
 
@@ -210,9 +222,8 @@ Also works with Cloudflare as a plain CDN/proxy in front of the self-hosted orig
 
 ## Not yet implemented (deliberately)
 
-Huffman-coded literal format v1 (spike approved, next up), voice mode, range coding,
-shared-dictionary Brotli, and encrypted/server-blind modes — the foundation stays
-small, deterministic, versioned, and perfectly reversible first.
+Voice mode, range coding, shared-dictionary Brotli, and encrypted/server-blind modes — the
+foundation stays small, deterministic, versioned, and perfectly reversible first.
 
 ## Deployment constraints
 

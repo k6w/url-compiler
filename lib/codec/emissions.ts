@@ -1,15 +1,17 @@
 import { getDictionaries, DictionarySet, DictRef } from "../dictionaries/version"
 import { Opcode, INLINE_DICTIONARY_BASE, INLINE_INTEGER_BASE, isInlineIntegerByte, varintLen, dictionaryRefCost } from "./opcodes"
-import { ByteWriter, zigzagEncode } from "./writer"
-import { ByteReader } from "./reader"
+import { ByteWriter, zigzagEncode, type StreamWriter } from "./writer"
+import type { Reader } from "./reader"
+import { decodeUtf8Strict } from "./reader"
 import { DecodeError } from "./types"
 import { config } from "../config"
+import type { HuffmanCodes } from "./huffman"
 
 const utf8 = new TextEncoder()
 
 export interface Emission {
   cost: number
-  emit: (w: ByteWriter) => void
+  emit: (w: StreamWriter) => void
 }
 
 export let literalCollector: Uint8Array[] | null = null
@@ -18,8 +20,38 @@ export function collectLiteralBytes(sink: Uint8Array[] | null): void {
   literalCollector = sink
 }
 
+let activeHuffman: HuffmanCodes | null = null
+
+/**
+ * Format v1 mode: while active, literal emissions Huffman-code their content
+ * and report fractional (byte-unit) costs. Single-threaded synchronous use
+ * only; always restored in finally.
+ */
+export function withHuffmanCodes<T>(huffman: HuffmanCodes | null, fn: () => T): T {
+  const prev = activeHuffman
+  activeHuffman = huffman
+  try {
+    return fn()
+  } finally {
+    activeHuffman = prev
+  }
+}
+
 export function literalEmission(text: string): Emission {
   const bytes = utf8.encode(text)
+  const huff = activeHuffman
+  if (huff !== null) {
+    let bits = 0
+    for (let i = 0; i < bytes.length; i++) bits += huff.bitLengthOf(bytes[i])
+    return {
+      cost: 1 + varintLen(bytes.length) + bits / 8,
+      emit: (w) => {
+        w.byte(Opcode.LITERAL_BYTES)
+        w.varint(bytes.length)
+        for (let i = 0; i < bytes.length; i++) huff.encodeByte(w, bytes[i])
+      },
+    }
+  }
   const cost = 1 + varintLen(bytes.length) + bytes.length
   return {
     cost,
@@ -143,14 +175,14 @@ export function dictSet(version = 0): DictionarySet {
   return getDictionaries(version)
 }
 
-export function decodeTypedValue(r: ByteReader): string {
+export function decodeTypedValue(r: Reader): string {
   const b = r.readByte()
   if (isInlineIntegerByte(b)) return String(b - INLINE_INTEGER_BASE)
   switch (b) {
     case Opcode.LITERAL_BYTES: {
       const len = r.readVarint()
       if (len > config.maxSegmentBytes) throw new DecodeError("LIMIT_EXCEEDED", "literal too large")
-      return r.readUtf8(len)
+      return decodeUtf8Strict(r.readLiteral(len))
     }
     case Opcode.INTEGER:
       return String(r.readZigzag())

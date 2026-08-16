@@ -50,7 +50,8 @@ export async function POST(request: Request) {
       saved: url.length - shortenedLength,
       warning: shortenedLength >= url.length,
       candidates: result.candidates.map((c) => ({
-        format: c.format,
+        format: c.format === "specialized" && c.version === 1 ? "specialized+huffman" : c.format,
+        version: c.version,
         bytes: c.bytes.length,
       })),
     })

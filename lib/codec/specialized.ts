@@ -7,7 +7,7 @@ import { queryKeyById } from "../dictionaries/query-keys"
 import { valueById } from "../dictionaries/values"
 import { UrlModel, QueryPair, toUrl } from "../url/model"
 import { validateModelLimits } from "../url/validate"
-import { ByteReader } from "./reader"
+import { ByteReader, type Reader, decodeUtf8Strict } from "./reader"
 import {
   Opcode,
   INLINE_DICTIONARY_BASE,
@@ -15,19 +15,17 @@ import {
   isInlineDictionaryByte,
   isInlineIntegerByte,
   varintLen,
-  dictionaryRefCost,
 } from "./opcodes"
-import { ByteWriter } from "./writer"
-import { matchTemplate, encodeTemplateBody, decodeTemplateBody } from "./templates"
+import { ByteWriter, type StreamWriter } from "./writer"
+import { BitWriter } from "./bit"
+import { matchTemplate, writeTemplateBody, decodeTemplateBody } from "./templates"
+import type { HuffmanCodes } from "./huffman"
 import {
   type Emission,
   literalEmission,
   dictRefEmission,
-  inlineDictEmission,
   contextDictEmission,
-  integerEmission,
-  uuidEmission,
-  hexEmission,
+  withHuffmanCodes,
   hexToBytes,
   bytesToHex,
   bytesToUuid,
@@ -48,13 +46,11 @@ import {
 const utf8 = new TextEncoder()
 
 function hostEmissions(hostname: string, set: DictionarySet): Emission[] {
+  const lit = literalEmission(hostname)
   const wholeLiteral: Emission = {
-    cost: 1 + varintLen(hostname.length) + hostname.length + 1,
+    cost: lit.cost + 1,
     emit: (w) => {
-      const bytes = utf8.encode(hostname)
-      w.byte(Opcode.LITERAL_BYTES)
-      w.varint(bytes.length)
-      w.bytes(bytes)
+      lit.emit(w)
       w.byte(Opcode.END)
     },
   }
@@ -133,7 +129,7 @@ function queryValueEmissions(text: string, set: DictionarySet): Emission[] {
   return emissions
 }
 
-function encodePath(segments: string[], set: DictionarySet, w: ByteWriter): void {
+function encodePath(segments: string[], set: DictionarySet, w: StreamWriter): void {
   const n = segments.length
   w.varint(n)
   if (n === 0) return
@@ -203,9 +199,15 @@ function encodePath(segments: string[], set: DictionarySet, w: ByteWriter): void
   for (let j = ops.length - 1; j >= 0; j--) ops[j]()
 }
 
-export function encodeSpecialized(model: UrlModel, dictVersion: number): Uint8Array {
+export interface SpecializedEncodeOptions {
+  /** Format v1: Huffman-coded literals with the frozen table. */
+  huffman?: HuffmanCodes
+}
+
+export function encodeSpecialized(model: UrlModel, dictVersion: number, options: SpecializedEncodeOptions = {}): Uint8Array {
   validateModelLimits(model)
   const set = getDictionaries(dictVersion)
+  const huffman = options.huffman ?? null
 
   let flags = 0
   if (model.scheme === "http") flags |= FLAG_HTTP
@@ -215,96 +217,99 @@ export function encodeSpecialized(model: UrlModel, dictVersion: number): Uint8Ar
   if (model.fragmentPresent) flags |= FLAG_FRAGMENT
   if (dictVersion > 0) flags |= FLAG_DICT_VERSION_EXT
 
-  const genericCore = new ByteWriter()
-  cheapest(hostEmissions(model.hostname, set)).emit(genericCore)
+  return withHuffmanCodes(huffman, () => {
+    const genericCore: StreamWriter = huffman ? new BitWriter() : new ByteWriter()
+    cheapest(hostEmissions(model.hostname, set)).emit(genericCore)
 
-  if (flags & FLAG_CREDENTIALS) {
-    const ub = utf8.encode(model.username ?? "")
-    genericCore.byte(Opcode.USERNAME)
-    genericCore.varint(ub.length)
-    genericCore.bytes(ub)
-    if (model.password !== undefined) {
-      const pb = utf8.encode(model.password)
-      genericCore.byte(Opcode.PASSWORD)
-      genericCore.varint(pb.length)
-      genericCore.bytes(pb)
-    }
-  }
-
-  if (flags & FLAG_PORT) {
-    genericCore.byte(Opcode.PORT)
-    genericCore.varint(model.port!)
-  }
-
-  encodePath(
-    model.pathSegments.map((s) => s.text),
-    set,
-    genericCore,
-  )
-
-  if (flags & FLAG_QUERY) {
-    genericCore.varint(model.query.length)
-    const segmentTexts = model.pathSegments.map((s) => s.text)
-    for (const pair of model.query) {
-      cheapest(queryKeyEmissions(pair.key, set)).emit(genericCore)
-      if (pair.value === null) {
-        genericCore.byte(Opcode.EMPTY_VALUE)
-      } else if (pair.value === "") {
-        genericCore.byte(Opcode.LITERAL_BYTES)
-        genericCore.varint(0)
-      } else if (pair.value === "true") {
-        genericCore.byte(Opcode.BOOLEAN_TRUE)
-      } else if (pair.value === "false") {
-        genericCore.byte(Opcode.BOOLEAN_FALSE)
-      } else {
-        const candidates: Emission[] = queryValueEmissions(pair.value, set)
-        const refIdx = segmentTexts.indexOf(pair.value)
-        if (refIdx >= 0) {
-          candidates.push({
-            cost: 1 + varintLen(refIdx),
-            emit: (w) => {
-              w.byte(Opcode.SEGMENT_BACKREF)
-              w.varint(refIdx)
-            },
-          })
-        }
-        cheapest(candidates).emit(genericCore)
+    if (flags & FLAG_CREDENTIALS) {
+      const ub = utf8.encode(model.username ?? "")
+      genericCore.byte(Opcode.USERNAME)
+      genericCore.varint(ub.length)
+      genericCore.bytes(ub)
+      if (model.password !== undefined) {
+        const pb = utf8.encode(model.password)
+        genericCore.byte(Opcode.PASSWORD)
+        genericCore.varint(pb.length)
+        genericCore.bytes(pb)
       }
     }
-  }
 
-  let core: Uint8Array
-  let effectiveFlags = flags
-  const templateMatch = flags & (FLAG_HTTP | FLAG_PORT | FLAG_CREDENTIALS) ? null : matchTemplate(model)
-  if (templateMatch !== null) {
-    const templateBytes = encodeTemplateBody(templateMatch)
-    if (templateBytes.length < genericCore.length) {
-      core = templateBytes
-      effectiveFlags = flags & ~FLAG_QUERY
-    } else {
-      core = genericCore.finish()
+    if (flags & FLAG_PORT) {
+      genericCore.byte(Opcode.PORT)
+      genericCore.varint(model.port!)
     }
-  } else {
-    core = genericCore.finish()
-  }
 
-  const w = new ByteWriter()
-  w.byte(formatByte("specialized", 0))
-  w.byte(effectiveFlags)
-  if (effectiveFlags & FLAG_DICT_VERSION_EXT) w.varint(dictVersion)
-  w.bytes(core)
+    encodePath(
+      model.pathSegments.map((s) => s.text),
+      set,
+      genericCore,
+    )
 
-  if (flags & FLAG_FRAGMENT) {
-    const fb = utf8.encode(model.fragment ?? "")
-    w.byte(Opcode.FRAGMENT)
-    w.varint(fb.length)
-    w.bytes(fb)
-  }
+    if (flags & FLAG_QUERY) {
+      genericCore.varint(model.query.length)
+      const segmentTexts = model.pathSegments.map((s) => s.text)
+      for (const pair of model.query) {
+        cheapest(queryKeyEmissions(pair.key, set)).emit(genericCore)
+        if (pair.value === null) {
+          genericCore.byte(Opcode.EMPTY_VALUE)
+        } else if (pair.value === "") {
+          genericCore.byte(Opcode.LITERAL_BYTES)
+          genericCore.varint(0)
+        } else if (pair.value === "true") {
+          genericCore.byte(Opcode.BOOLEAN_TRUE)
+        } else if (pair.value === "false") {
+          genericCore.byte(Opcode.BOOLEAN_FALSE)
+        } else {
+          const candidates: Emission[] = queryValueEmissions(pair.value, set)
+          const refIdx = segmentTexts.indexOf(pair.value)
+          if (refIdx >= 0) {
+            candidates.push({
+              cost: 1 + varintLen(refIdx),
+              emit: (w) => {
+                w.byte(Opcode.SEGMENT_BACKREF)
+                w.varint(refIdx)
+              },
+            })
+          }
+          cheapest(candidates).emit(genericCore)
+        }
+      }
+    }
 
-  return w.finish()
+    let body: StreamWriter = genericCore
+    let effectiveFlags = flags
+    const templateMatch = flags & (FLAG_HTTP | FLAG_PORT | FLAG_CREDENTIALS) ? null : matchTemplate(model)
+    if (templateMatch !== null) {
+      const templateBody: StreamWriter = huffman ? new BitWriter() : new ByteWriter()
+      writeTemplateBody(templateBody, templateMatch)
+      if (templateBody.bitLength < genericCore.bitLength) {
+        body = templateBody
+        effectiveFlags = flags & ~FLAG_QUERY
+      }
+    }
+
+    if (flags & FLAG_FRAGMENT) {
+      const fb = utf8.encode(model.fragment ?? "")
+      body.byte(Opcode.FRAGMENT)
+      body.varint(fb.length)
+      body.bytes(fb)
+    }
+
+    const header = new ByteWriter()
+    header.byte(formatByte("specialized", huffman ? 1 : 0))
+    header.byte(effectiveFlags)
+    if (effectiveFlags & FLAG_DICT_VERSION_EXT) header.varint(dictVersion)
+
+    const headerBytes = header.finish()
+    const bodyBytes = body.finish()
+    const out = new Uint8Array(headerBytes.length + bodyBytes.length)
+    out.set(headerBytes)
+    out.set(bodyBytes, headerBytes.length)
+    return out
+  })
 }
 
-function decodeSpecializedTemplate(r: ByteReader, flags: number): UrlModel {
+function decodeSpecializedTemplate(r: Reader, flags: number): UrlModel {
   if (flags & (FLAG_HTTP | FLAG_PORT | FLAG_CREDENTIALS | FLAG_QUERY)) {
     throw new DecodeError("INVALID_OPCODE", "template payload must not carry http/port/credentials/query flags")
   }
@@ -345,7 +350,7 @@ function resolveContextDict(b: number, set: DictionarySet, ctx: InstructionConte
   return valueById(set, inlineId)
 }
 
-function decodeInstruction(b: number, r: ByteReader, set: DictionarySet, ctx: InstructionContext): string {
+function decodeInstruction(b: number, r: Reader, set: DictionarySet, ctx: InstructionContext): string {
   if (isInlineDictionaryByte(b)) {
     const inlineId = b - INLINE_DICTIONARY_BASE
     const dict = ctx === "path" ? set.paths : ctx === "key" ? set.queryKeys : set.values
@@ -371,7 +376,7 @@ function decodeInstruction(b: number, r: ByteReader, set: DictionarySet, ctx: In
     case Opcode.LITERAL_BYTES: {
       const len = r.readVarint()
       if (len > config.maxSegmentBytes) throw new DecodeError("LIMIT_EXCEEDED", "literal too large")
-      return r.readUtf8(len)
+      return decodeUtf8Strict(r.readLiteral(len))
     }
     case Opcode.INTEGER:
       return String(r.readZigzag())
@@ -391,7 +396,7 @@ function isInlineIntegerValue(b: number): boolean {
   return isInlineIntegerByte(b)
 }
 
-export function decodeSpecialized(r: ByteReader, flags: number, set: DictionarySet): UrlModel {
+export function decodeSpecialized(r: Reader, flags: number, set: DictionarySet): UrlModel {
   if (r.peek() === Opcode.SERVICE_TEMPLATE) {
     return decodeSpecializedTemplate(r, flags)
   }
@@ -421,7 +426,7 @@ export function decodeSpecialized(r: ByteReader, flags: number, set: DictionaryS
     } else if (b === Opcode.LITERAL_BYTES) {
       const len = r.readVarint()
       if (len > 63) throw new DecodeError("LIMIT_EXCEEDED", "host label too long")
-      labels.push(r.readUtf8(len))
+      labels.push(decodeUtf8Strict(r.readLiteral(len)))
     } else if (b === Opcode.SUFFIX) {
       if (suffix !== null) throw new DecodeError("INVALID_OPCODE", "duplicate suffix")
       const id = r.readVarint()

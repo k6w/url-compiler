@@ -1,4 +1,15 @@
-export class ByteWriter {
+/** Writer surface shared by the byte-oriented (v0) and bit-oriented (v1) formats. */
+export interface StreamWriter {
+  byte(b: number): unknown
+  bytes(arr: Uint8Array): unknown
+  varint(n: number): unknown
+  zigzag(n: number): unknown
+  writeBits(value: number, count: number): unknown
+  readonly bitLength: number
+  finish(): Uint8Array
+}
+
+export class ByteWriter implements StreamWriter {
   private buf: number[] = []
 
   byte(b: number): this {
@@ -10,6 +21,12 @@ export class ByteWriter {
   bytes(arr: Uint8Array): this {
     for (let i = 0; i < arr.length; i++) this.buf.push(arr[i])
     return this
+  }
+
+  writeBits(value: number, count: number): this {
+    if (count === 8) return this.byte(value)
+    if (count === 0) return this
+    throw new RangeError("ByteWriter only supports 8-bit writes")
   }
 
   varint(n: number): this {
@@ -27,6 +44,10 @@ export class ByteWriter {
 
   zigzag(n: number): this {
     return this.varint(zigzagEncode(n))
+  }
+
+  get bitLength(): number {
+    return this.buf.length * 8
   }
 
   get length(): number {

@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { encodeSpecialized } from "@/lib/codec/specialized"
+import { huffmanV1 } from "@/lib/codec/huffman"
 import { encodeUrl, decodePayloadString, compressFamilyPayload } from "@/lib/codec/candidates"
 import { canonicalize } from "@/lib/url/normalize"
 import { base64UrlEncode } from "@/lib/alphabet/base64url"
@@ -29,6 +30,10 @@ const strategies: Record<string, Strategy> = {
   specialized: (canonical) => {
     const { model } = canonicalize(canonical)
     return base64UrlEncode(encodeSpecialized(model, getDictionaries(0).version))
+  },
+  "specialized-huffman": (canonical) => {
+    const { model } = canonicalize(canonical)
+    return base64UrlEncode(encodeSpecialized(model, getDictionaries(0).version, { huffman: huffmanV1() }))
   },
   brotli: (canonical) => base64UrlEncode(compressFamilyPayload("brotli", canonical)),
   deflate: (canonical) => base64UrlEncode(compressFamilyPayload("deflate", canonical)),

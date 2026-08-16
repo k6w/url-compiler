@@ -66,6 +66,8 @@ export class NotImplemented extends Error {
 
 export interface PayloadCandidate {
   format: FormatFamily
+  /** Specialized bytecode format version (0 = raw literals, 1 = Huffman literals). */
+  version: number
   bytes: Uint8Array
   canonical: string
 }

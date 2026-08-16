@@ -3,7 +3,20 @@ import { zigzagDecode } from "./writer"
 
 const utf8Decoder = new TextDecoder("utf-8", { fatal: true })
 
-export class ByteReader {
+/** Reader surface shared by the byte-oriented (v0) and bit-oriented (v1) formats. */
+export interface Reader {
+  eof(): boolean
+  peek(): number
+  readByte(): number
+  readVarint(maxBytes?: number): number
+  readZigzag(): number
+  readBytes(n: number): Uint8Array
+  readLiteral(n: number): Uint8Array
+  readUtf8(n: number): string
+  expectEnd(): void
+}
+
+export class ByteReader implements Reader {
   constructor(
     private readonly buf: Uint8Array,
     private pos = 0,
@@ -58,6 +71,11 @@ export class ByteReader {
     const out = this.buf.subarray(this.pos, this.pos + n)
     this.pos += n
     return out
+  }
+
+  /** Format v0: literal content is raw bytes. */
+  readLiteral(n: number): Uint8Array {
+    return this.readBytes(n)
   }
 
   rest(): Uint8Array {

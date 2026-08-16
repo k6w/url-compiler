@@ -1,6 +1,6 @@
 import { UrlModel, QueryPair, PathSegment } from "../url/model"
-import { ByteReader } from "./reader"
-import { ByteWriter } from "./writer"
+import type { Reader } from "./reader"
+import type { StreamWriter } from "./writer"
 import { DecodeError } from "./types"
 import { Opcode } from "./opcodes"
 import {
@@ -318,18 +318,16 @@ export function paramEmissions(param: string): Emission {
   return cheapest(candidates)
 }
 
-export function encodeTemplateBody(match: TemplateMatch): Uint8Array {
-  const w = new ByteWriter()
-  w.byte(Opcode_SERVICE_TEMPLATE)
+export function writeTemplateBody(w: StreamWriter, match: TemplateMatch): void {
+  w.byte(Opcode.SERVICE_TEMPLATE)
   w.varint(match.id)
   w.varint(match.params.length)
   for (const param of match.params) {
     paramEmissions(param).emit(w)
   }
-  return w.finish()
 }
 
-export function decodeTemplateBody(r: ByteReader): TemplateParts {
+export function decodeTemplateBody(r: Reader): TemplateParts {
   const id = r.readVarint()
   const template = templateById(id)
   const count = r.readVarint()

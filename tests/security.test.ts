@@ -132,7 +132,29 @@ describe("binary stream hardening", async () => {
 
   test("unknown format byte is rejected", async () => {
     await expectDecodeError(new Uint8Array([0xc0, 0x00]), "UNKNOWN_FORMAT")
-    await expectDecodeError(new Uint8Array([0x01, 0x00]), "UNKNOWN_FORMAT")
+    await expectDecodeError(new Uint8Array([0x02, 0x00]), "UNKNOWN_FORMAT")
+    await expectDecodeError(new Uint8Array([0x41, 0x00]), "UNKNOWN_FORMAT")
+  })
+
+  test("oversized specialized format version is rejected", async () => {
+    const w = new ByteWriter()
+    w.byte(formatByte("specialized", 2))
+    w.byte(0)
+    await expectDecodeError(w.finish(), "UNKNOWN_FORMAT")
+  })
+
+  test("huffman format v1 rejects truncated bit stream and bad padding", async () => {
+    const { canonicalize: canon } = await import("@/lib/url/normalize")
+    const { encodeSpecialized: enc } = await import("@/lib/codec/specialized")
+    const { huffmanV1 } = await import("@/lib/codec/huffman")
+    const { model } = canon("https://some-host.example/with/literal/segments/only")
+    const full = enc(model, 1, { huffman: huffmanV1() })
+    await expect(decodePayloadBytes(full.subarray(0, full.length - 1))).rejects.toBeInstanceOf(DecodeError)
+    await expect(decodePayloadBytes(full.subarray(0, 2))).rejects.toBeInstanceOf(DecodeError)
+    const padded = new Uint8Array(full.length + 1)
+    padded.set(full)
+    padded[full.length] = 0xff
+    await expectDecodeError(padded, "TRAILING_DATA")
   })
 
   test("encryption flag is rejected", async () => {
