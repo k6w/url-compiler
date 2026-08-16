@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const decoded = decodePayloadString(payload)
+    const decoded = await decodePayloadString(payload)
     const parsed = validateRedirectTarget(decoded.target)
     return Response.json({
       payload,

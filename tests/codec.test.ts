@@ -52,69 +52,69 @@ const FIXTURES: string[] = [
   "https://example.com/true/false/boolean?on=true&off=false",
 ]
 
-describe("codec round-trip", () => {
+describe("codec round-trip", async () => {
   for (const url of FIXTURES) {
-    test(`ultra: ${url}`, () => {
-      const result = encodeUrl(url)
+    test(`ultra: ${url}`, async () => {
+      const result = await encodeUrl(url)
       expect(result.canonical.length).toBeGreaterThan(0)
-      const decoded = decodePayloadString(result.ultraPayload)
+      const decoded = await decodePayloadString(result.ultraPayload)
       expect(decoded.target).toBe(result.canonical)
       expect(decoded.via).toBe("base64url")
     })
 
-    test(`human: ${url}`, () => {
-      const result = encodeUrl(url)
-      const decoded = decodePayloadString(result.humanPayload)
+    test(`human: ${url}`, async () => {
+      const result = await encodeUrl(url)
+      const decoded = await decodePayloadString(result.humanPayload)
       expect(decoded.target).toBe(result.canonical)
       expect(decoded.via).toBe("base32")
     })
 
-    test(`every candidate verifies: ${url}`, () => {
-      const result = encodeUrl(url)
+    test(`every candidate verifies: ${url}`, async () => {
+      const result = await encodeUrl(url)
       for (const candidate of result.candidates) {
-        expect(decodePayloadBytes(candidate.bytes).target).toBe(result.canonical)
+        expect((await decodePayloadBytes(candidate.bytes)).target).toBe(result.canonical)
       }
     })
   }
 
-  test("specialized beats or ties literal size for dictionary-friendly urls", () => {
-    const result = encodeUrl("https://github.com/vercel/next.js/pull/58452")
+  test("specialized beats or ties literal size for dictionary-friendly urls", async () => {
+    const result = await encodeUrl("https://github.com/vercel/next.js/pull/58452")
     const specialized = result.candidates.find((c) => c.format === "specialized")
     expect(specialized).toBeDefined()
     expect(specialized!.bytes.length).toBeLessThan(64)
   })
 
-  test("selection prefers smallest verified candidate", () => {
-    const result = encodeUrl("https://www.example.com/products/12345?utm_source=google&id=7")
+  test("selection prefers smallest verified candidate", async () => {
+    const result = await encodeUrl("https://www.example.com/products/12345?utm_source=google&id=7")
     const minBytes = Math.min(...result.candidates.map((c) => c.bytes.length))
     expect(result.best.bytes.length).toBe(minBytes)
   })
 })
 
-describe("human mode aliases", () => {
-  test("decodes case-insensitively with alias characters", () => {
-    const result = encodeUrl("https://example.com/alias")
+describe("human mode aliases", async () => {
+  test("decodes case-insensitively with alias characters", async () => {
+    const result = await encodeUrl("https://example.com/alias")
     const aliased = result.humanPayload
       .toLowerCase()
       .replace(/0/g, "o")
       .replace(/1/g, "i")
-    expect(decodePayloadString(aliased).target).toBe(result.canonical)
+    expect((await decodePayloadString(aliased)).target).toBe(result.canonical)
   })
 })
 
-describe("canonical payload stability", () => {
-  test("encode(decode(payload)) is canonical", () => {
+describe("canonical payload stability", async () => {
+  test("encode(decode(payload)) is canonical", async () => {
     for (const url of FIXTURES.slice(0, 15)) {
-      const result = encodeUrl(url)
-      const decoded = decodePayloadString(result.ultraPayload)
+      const result = await encodeUrl(url)
+      const decoded = await decodePayloadString(result.ultraPayload)
       const recanonicalized = canonicalize(decoded.target)
-      const reencoded = encodeUrl(recanonicalized.canonical)
+      const reencoded = await encodeUrl(recanonicalized.canonical)
       expect(reencoded.canonical).toBe(result.canonical)
     }
   })
 })
 
-describe("property-based round-trip", () => {
+describe("property-based round-trip", async () => {
   function mulberry32(seed: number) {
     let a = seed
     return () => {
@@ -158,17 +158,17 @@ describe("property-based round-trip", () => {
     return url
   }
 
-  test("decode(encode(model)) === canonical for 300 random models", () => {
+  test("decode(encode(model)) === canonical for 300 random models", async () => {
     const rand = mulberry32(0xc0ffee)
     for (let i = 0; i < 300; i++) {
       const url = randomModelUrl(rand)
-      const result = encodeUrl(url)
-      expect(decodePayloadString(result.ultraPayload).target).toBe(result.canonical)
-      expect(decodePayloadString(result.humanPayload).target).toBe(result.canonical)
+      const result = await encodeUrl(url)
+      expect((await decodePayloadString(result.ultraPayload)).target).toBe(result.canonical)
+      expect((await decodePayloadString(result.humanPayload)).target).toBe(result.canonical)
     }
   })
 
-  test("canonicalization is idempotent for random models", () => {
+  test("canonicalization is idempotent for random models", async () => {
     const rand = mulberry32(0xfeed)
     for (let i = 0; i < 300; i++) {
       const url = randomModelUrl(rand)
@@ -179,8 +179,8 @@ describe("property-based round-trip", () => {
   })
 })
 
-describe("dictionary versioning", () => {
-  test("version 0 is registered and immutable", () => {
+describe("dictionary versioning", async () => {
+  test("version 0 is registered and immutable", async () => {
     const set = getDictionaries(0)
     expect(set.version).toBe(0)
     expect(() => {
@@ -189,18 +189,18 @@ describe("dictionary versioning", () => {
     expect(set.hosts.length).toBeGreaterThan(32)
   })
 
-  test("unknown dictionary version throws", () => {
+  test("unknown dictionary version throws", async () => {
     expect(() => getDictionaries(99)).toThrow(/dictionary version/)
   })
 
-  test("payload with unknown dictionary version is rejected", () => {
+  test("payload with unknown dictionary version is rejected", async () => {
     const w = new ByteWriter()
     w.byte(formatByte("specialized", 0))
     w.byte(0b0010_0000)
     w.varint(99)
-    const decoded = (() => {
+    const decoded = await (async () => {
       try {
-        decodePayloadBytes(w.finish())
+        await decodePayloadBytes(w.finish())
         return "no-error"
       } catch (e) {
         return (e as { code?: string }).code ?? String(e)
@@ -210,8 +210,8 @@ describe("dictionary versioning", () => {
   })
 })
 
-describe("raw specialized bytecode directly", () => {
-  test("host dictionary full reference", () => {
+describe("raw specialized bytecode directly", async () => {
+  test("host dictionary full reference", async () => {
     const { model } = canonicalize("https://github.com/vercel/next.js")
     const bytes = encodeSpecialized(model, 0)
     expect(bytes[0]).toBe(formatByte("specialized", 0))

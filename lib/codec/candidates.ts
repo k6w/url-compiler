@@ -2,7 +2,7 @@ import { config } from "../config"
 import { canonicalize } from "../url/normalize"
 import { validateModelLimits } from "../url/validate"
 import { toUrl } from "../url/model"
-import { DictionaryVersionError, getDictionaries } from "../dictionaries/version"
+import { DictionaryVersionError, getDictionaries, isSupportedDictionaryVersion, supportedDictionaryVersions } from "../dictionaries/version"
 import { decodeSpecialized, encodeSpecialized } from "./specialized"
 import { brotliCompress, brotliDecompressToString } from "./brotli"
 import { deflateCompress, deflateDecompressToString } from "./deflate"
@@ -59,7 +59,7 @@ export interface DecodedPayload {
   dictionaryVersion: number
 }
 
-export function decodePayloadBytes(bytes: Uint8Array): DecodedPayload {
+export async function decodePayloadBytes(bytes: Uint8Array): Promise<DecodedPayload> {
   const r = new ByteReader(bytes)
   const b0 = r.readByte()
   const fmt = parseFormatByte(b0)
@@ -91,7 +91,7 @@ export function decodePayloadBytes(bytes: Uint8Array): DecodedPayload {
 
   const rest = r.rest()
   const urlStr =
-    fmt.family === "brotli" ? brotliDecompressToString(rest) : deflateDecompressToString(rest)
+    fmt.family === "brotli" ? await brotliDecompressToString(rest) : await deflateDecompressToString(rest)
   try {
     const model = modelFromUrlString(urlStr)
     return { target: toUrl(model), family: fmt.family, formatVersion: fmt.version, dictionaryVersion: 0 }
@@ -106,7 +106,7 @@ export interface DecodedVia extends DecodedPayload {
 
 const BASE64URL_RE = /^[A-Za-z0-9_-]+$/
 
-export function decodePayloadString(payload: string): DecodedVia {
+export async function decodePayloadString(payload: string): Promise<DecodedVia> {
   if (payload.length === 0) {
     throw new DecodeError("INVALID_ALPHABET", "empty payload")
   }
@@ -117,7 +117,7 @@ export function decodePayloadString(payload: string): DecodedVia {
   if (BASE64URL_RE.test(payload)) {
     try {
       const bytes = base64UrlDecode(payload)
-      const decoded = decodePayloadBytes(bytes)
+      const decoded = await decodePayloadBytes(bytes)
       return { ...decoded, via: "base64url" }
     } catch (e) {
       if (e instanceof DecodeError) errors.push(e)
@@ -126,7 +126,7 @@ export function decodePayloadString(payload: string): DecodedVia {
   }
   try {
     const bytes = humanDecode(payload)
-    const decoded = decodePayloadBytes(bytes)
+    const decoded = await decodePayloadBytes(bytes)
     return { ...decoded, via: "base32" }
   } catch (e) {
     if (e instanceof DecodeError) errors.push(e)
@@ -136,10 +136,16 @@ export function decodePayloadString(payload: string): DecodedVia {
   throw meaningful ?? errors[0] ?? new DecodeError("INVALID_ALPHABET", "undecodable payload")
 }
 
-export function encodeUrl(input: string, options: EncodeOptions = {}): EncodeResult {
+function resolveDictionaryVersion(requested: number): number {
+  if (isSupportedDictionaryVersion(requested)) return requested
+  const older = supportedDictionaryVersions.filter((v) => v <= requested)
+  return older.length > 0 ? older[older.length - 1] : supportedDictionaryVersions[0]
+}
+
+export async function encodeUrl(input: string, options: EncodeOptions = {}): Promise<EncodeResult> {
   const { model, canonical } = canonicalize(input, { aggressive: options.aggressive })
   validateModelLimits(model)
-  const dictVersion = options.dictVersion ?? config.activeDictionaryVersion
+  const dictVersion = resolveDictionaryVersion(options.dictVersion ?? config.activeDictionaryVersion)
 
   const drafts: PayloadCandidate[] = [
     { format: "specialized", bytes: encodeSpecialized(model, dictVersion), canonical },
@@ -150,7 +156,7 @@ export function encodeUrl(input: string, options: EncodeOptions = {}): EncodeRes
   const candidates: PayloadCandidate[] = []
   for (const draft of drafts) {
     try {
-      const decoded = decodePayloadBytes(draft.bytes)
+      const decoded = await decodePayloadBytes(draft.bytes)
       if (decoded.target === canonical) {
         candidates.push({ ...draft, canonical: decoded.target })
       }

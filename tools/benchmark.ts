@@ -63,7 +63,7 @@ function stats(values: number[]): Omit<Row, "category" | "strategy"> {
   }
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const rows: Row[] = []
   const warnings: string[] = []
 
@@ -84,14 +84,14 @@ function main(): void {
     let decodeTotal = 0
     const encStart = performance.now()
     for (const url of category.urls) {
-      const result = encodeUrl(url)
+      const result = await encodeUrl(url)
       lengths.push(ORIGIN.length + 1 + result.ultraPayload.length)
     }
     const encodeMs = performance.now() - encStart
     for (const url of category.urls) {
-      const result = encodeUrl(url)
+      const result = await encodeUrl(url)
       const decStart = performance.now()
-      decodePayloadString(result.ultraPayload)
+      await decodePayloadString(result.ultraPayload)
       decodeTotal += performance.now() - decStart
     }
     rows.push({
@@ -140,3 +140,4 @@ function main(): void {
 }
 
 main()
+await main()

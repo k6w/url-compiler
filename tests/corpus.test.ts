@@ -18,7 +18,7 @@ interface CategoryMetrics {
 
 const ORIGIN = "http://localhost:3000"
 
-function runCorpus(): { entries: CategoryMetrics[]; total: number; shortenedCount: number } {
+async function runCorpus(): Promise<{ entries: CategoryMetrics[]; total: number; shortenedCount: number }> {
   const entries: CategoryMetrics[] = []
   let total = 0
   let shortenedCount = 0
@@ -33,15 +33,15 @@ function runCorpus(): { entries: CategoryMetrics[]; total: number; shortenedCoun
     let decodeMs = 0
     for (const url of category.urls) {
       const encStart = performance.now()
-      const result = encodeUrl(url)
+      const result = await encodeUrl(url)
       encodeMs += performance.now() - encStart
 
       const decStart = performance.now()
-      const decoded = decodePayloadString(result.ultraPayload)
+      const decoded = await decodePayloadString(result.ultraPayload)
       decodeMs += performance.now() - decStart
 
       expect(decoded.target).toBe(result.canonical)
-      const humanDecoded = decodePayloadString(result.humanPayload)
+      const humanDecoded = await decodePayloadString(result.humanPayload)
       expect(humanDecoded.target).toBe(result.canonical)
 
       const ultraLength = ORIGIN.length + 1 + result.ultraPayload.length
@@ -70,25 +70,25 @@ function runCorpus(): { entries: CategoryMetrics[]; total: number; shortenedCoun
   return { entries, total, shortenedCount }
 }
 
-describe("corpus", () => {
-  test("every corpus url round-trips in both modes", () => {
-    const { entries, total } = runCorpus()
+describe("corpus", async () => {
+  test("every corpus url round-trips in both modes", async () => {
+    const { entries, total } = await runCorpus()
     expect(total).toBeGreaterThanOrEqual(40)
     for (const entry of entries) {
       expect(entry.urls).toBeGreaterThan(0)
     }
   })
 
-  test("dictionary-friendly categories compress well at the payload level", () => {
-    const { entries } = runCorpus()
+  test("dictionary-friendly categories compress well at the payload level", async () => {
+    const { entries } = await runCorpus()
     for (const name of ["long-paths", "api", "uuid", "tracking", "service-template"]) {
       const entry = entries.find((e) => e.category === name)
       expect(entry!.avgUltraPayload).toBeLessThan(entry!.avgOriginal)
     }
   })
 
-  test("no major regression against committed baseline", () => {
-    const { entries } = runCorpus()
+  test("no major regression against committed baseline", async () => {
+    const { entries } = await runCorpus()
     const baselinePath = "data/benchmarks/baseline.json"
     if (!existsSync(baselinePath)) return
     const baseline = JSON.parse(readFileSync(baselinePath, "utf8")) as { categories: CategoryMetrics[] }
@@ -100,8 +100,8 @@ describe("corpus", () => {
     }
   })
 
-  test("records latest metrics", () => {
-    const { entries, total, shortenedCount } = runCorpus()
+  test("records latest metrics", async () => {
+    const { entries, total, shortenedCount } = await runCorpus()
     mkdirSync("data/benchmarks", { recursive: true })
     writeFileSync(
       "data/benchmarks/latest.json",

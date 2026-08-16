@@ -156,17 +156,42 @@ service-template      89           66             66   (0.742)
 Full results in `data/benchmarks/benchmark.json`; regression baseline in
 `data/benchmarks/baseline.json` (corpus tests fail on >5% category regression).
 
+## Deployment
+
+Two supported targets, same codebase, byte-identical decode behavior:
+
+### Self-hosted (Node / Bun)
+
+```bash
+bun run build && bun run start   # next start, Node runtime
+```
+
+Set `PUBLIC_ORIGIN` to the public origin serving the app.
+
+### Cloudflare Workers (workerd)
+
+```bash
+bun run preview:cloudflare   # build + local workerd preview (miniflare)
+bun run deploy:cloudflare    # build + wrangler deploy
+```
+
+Uses `@opennextjs/cloudflare` with `nodejs_compat` (see `wrangler.jsonc`, `open-next.config.ts`).
+Parity is verified: specialized, Brotli, and DEFLATE payloads all decode identically under
+workerd — the compression adapter (`lib/codec/compress.ts`) prefers `node:zlib` and falls back to
+Web `DecompressionStream` per format, capability-detected at runtime. `PUBLIC_ORIGIN` and limits
+are set as Worker vars.
+
+Also works with Cloudflare as a plain CDN/proxy in front of the self-hosted origin.
+
 ## Not yet implemented (deliberately)
 
 Voice mode, Huffman/range coding of the specialized stream, Zstandard, shared-dictionary Brotli,
 service templates, and encrypted/server-blind modes are stubs or absent — the foundation is
 small, deterministic, versioned, and perfectly reversible first.
 
-## Deployment notes
+## Deployment constraints
 
 - Patched Next.js **16.2.11** (July 2026 security release: 4 high + 5 medium fixes), exact-pinned
   with the lockfile committed.
-- Node.js runtime for all routes (predictable `node:zlib` / crypto access). Edge migration only
-  after verifying byte-identical codec behavior there.
 - Pin runtime versions in deployment and confirm local/production decoders agree (the round-trip
-  tests are the contract).
+  and golden tests are the contract).

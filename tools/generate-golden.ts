@@ -28,12 +28,12 @@ interface GoldenEntry {
   human: string
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const urls = [...corpus.categories.flatMap((c) => c.urls), ...EXTRA_FIXTURES]
   const entries: GoldenEntry[] = []
   for (const url of urls) {
     const { canonical } = canonicalize(url)
-    const result = encodeUrl(url)
+    const result = await encodeUrl(url)
     entries.push({
       original: url,
       target: canonical,
@@ -63,3 +63,4 @@ function main(): void {
 }
 
 main()
+await main()

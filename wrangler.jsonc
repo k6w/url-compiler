@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "url-compiler",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "PUBLIC_ORIGIN": "https://url-compiler.example.workers.dev",
+    "ENABLE_PRIVATE_MODE": "false",
+    "ACTIVE_DICTIONARY_VERSION": "0",
+    "MAX_PAYLOAD_LENGTH": "2048",
+    "MAX_TARGET_LENGTH": "8192"
+  }
+}

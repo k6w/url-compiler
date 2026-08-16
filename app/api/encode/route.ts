@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   try {
     assertPrivateModeDisabled()
-    const result = encodeUrl(url, { aggressive })
+    const result = await encodeUrl(url, { aggressive })
     const payload = mode === "human" ? result.humanPayload : result.ultraPayload
     const shortUrl = `${config.publicOrigin}/${payload}`
     const shortenedLength = shortUrl.length

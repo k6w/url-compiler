@@ -13,10 +13,10 @@ import { encodeSpecialized } from "@/lib/codec/specialized"
 import { canonicalize } from "@/lib/url/normalize"
 import zlib from "node:zlib"
 
-function expectDecodeError(payload: string | Uint8Array, code: DecodeErrorCode) {
+async function expectDecodeError(payload: string | Uint8Array, code: DecodeErrorCode) {
   try {
-    if (typeof payload === "string") decodePayloadString(payload)
-    else decodePayloadBytes(payload)
+    if (typeof payload === "string") await decodePayloadString(payload)
+    else await decodePayloadBytes(payload)
     throw new Error(`expected DecodeError ${code}, got success`)
   } catch (e) {
     if (e instanceof DecodeError) {
@@ -27,7 +27,7 @@ function expectDecodeError(payload: string | Uint8Array, code: DecodeErrorCode) 
   }
 }
 
-describe("dangerous schemes are rejected", () => {
+describe("dangerous schemes are rejected", async () => {
   const dangerous = [
     "javascript:alert(1)",
     "data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==",
@@ -38,130 +38,130 @@ describe("dangerous schemes are rejected", () => {
     " javascript:alert(1)",
   ]
   for (const url of dangerous) {
-    test(`parse rejects ${JSON.stringify(url)}`, () => {
+    test(`parse rejects ${JSON.stringify(url)}`, async () => {
       expect(() => parseUrl(url)).toThrow()
     })
-    test(`redirect validation rejects ${JSON.stringify(url)}`, () => {
+    test(`redirect validation rejects ${JSON.stringify(url)}`, async () => {
       expect(() => validateRedirectTarget(url)).toThrow(RedirectError)
     })
   }
 })
 
-describe("redirect target validation", () => {
-  test("allows http and https", () => {
+describe("redirect target validation", async () => {
+  test("allows http and https", async () => {
     expect(validateRedirectTarget("https://example.com/").protocol).toBe("https:")
     expect(validateRedirectTarget("http://example.com/").protocol).toBe("http:")
   })
 
-  test("rejects control characters (CRLF injection)", () => {
+  test("rejects control characters (CRLF injection)", async () => {
     expect(() => validateRedirectTarget("https://example.com/\r\nSet-Cookie:evil=1")).toThrow(/control/)
     expect(() => validateRedirectTarget("https://example.com/\x00")).toThrow(/control/)
   })
 
-  test("rejects oversized targets", () => {
+  test("rejects oversized targets", async () => {
     expect(() => validateRedirectTarget("https://example.com/" + "a".repeat(9000))).toThrow(/maximum length/)
   })
 
-  test("rejects malformed targets", () => {
+  test("rejects malformed targets", async () => {
     expect(() => validateRedirectTarget("not-a-url")).toThrow()
     expect(() => validateRedirectTarget("")).toThrow()
   })
 })
 
-describe("payload limits", () => {
-  test("oversized payloads are rejected", () => {
-    expectDecodeError("A".repeat(3000), "OVERSIZED_PAYLOAD")
+describe("payload limits", async () => {
+  test("oversized payloads are rejected", async () => {
+    await expectDecodeError("A".repeat(3000), "OVERSIZED_PAYLOAD")
   })
 
-  test("encoding oversized urls fails validation", () => {
+  test("encoding oversized urls fails validation", async () => {
     const long = "https://example.com/" + "a".repeat(9000)
-    expect(() => encodeUrl(long)).toThrow()
+    await expect(encodeUrl(long)).rejects.toThrow()
   })
 })
 
-describe("alphabet validation", () => {
-  test("invalid base64url characters are rejected", () => {
-    expectDecodeError("abc$%", "INVALID_ALPHABET")
-    expectDecodeError("abc+/", "INVALID_ALPHABET")
+describe("alphabet validation", async () => {
+  test("invalid base64url characters are rejected", async () => {
+    await expectDecodeError("abc$%", "INVALID_ALPHABET")
+    await expectDecodeError("abc+/", "INVALID_ALPHABET")
   })
 
-  test("padded base64url is rejected", () => {
-    expectDecodeError("abcd=", "INVALID_ALPHABET")
+  test("padded base64url is rejected", async () => {
+    await expectDecodeError("abcd=", "INVALID_ALPHABET")
   })
 
-  test("non-canonical base64url leftover bits are rejected", () => {
+  test("non-canonical base64url leftover bits are rejected", async () => {
     const bytes = encodeSpecialized(canonicalize("https://example.com/canonical").model, 0)
     const encoded = base64UrlEncode(bytes)
-    expect(() => decodePayloadString(encoded + "a")).toThrow(DecodeError)
-    expect(() => decodePayloadString(encoded + "$")).toThrow(DecodeError)
-    expect(() => decodePayloadString(encoded.slice(0, -1))).toThrow(DecodeError)
+    await expect(decodePayloadString(encoded + "a")).rejects.toBeInstanceOf(DecodeError)
+    await expect(decodePayloadString(encoded + "$")).rejects.toBeInstanceOf(DecodeError)
+    await expect(decodePayloadString(encoded.slice(0, -1))).rejects.toBeInstanceOf(DecodeError)
   })
 
-  test("empty payload is rejected", () => {
-    expectDecodeError("", "INVALID_ALPHABET")
+  test("empty payload is rejected", async () => {
+    await expectDecodeError("", "INVALID_ALPHABET")
   })
 
-  test("invalid base32 characters are rejected", () => {
-    expectDecodeError("1234*67890", "INVALID_ALPHABET")
-    expectDecodeError("uuuu", "UNKNOWN_FORMAT")
+  test("invalid base32 characters are rejected", async () => {
+    await expectDecodeError("1234*67890", "INVALID_ALPHABET")
+    await expectDecodeError("uuuu", "UNKNOWN_FORMAT")
   })
 })
 
-describe("binary stream hardening", () => {
-  test("truncated streams are rejected", () => {
+describe("binary stream hardening", async () => {
+  test("truncated streams are rejected", async () => {
     const bytes = encodeSpecialized(canonicalize("https://example.com/a/b/c?x=1#f").model, 0)
-    expectDecodeError(bytes.subarray(0, bytes.length - 2), "TRUNCATED")
+    await expectDecodeError(bytes.subarray(0, bytes.length - 2), "TRUNCATED")
   })
 
-  test("trailing data is rejected", () => {
+  test("trailing data is rejected", async () => {
     const bytes = encodeSpecialized(canonicalize("https://example.com/").model, 0)
     const padded = new Uint8Array(bytes.length + 1)
     padded.set(bytes)
     padded[bytes.length] = 0x41
-    expectDecodeError(padded, "TRAILING_DATA")
+    await expectDecodeError(padded, "TRAILING_DATA")
   })
 
-  test("invalid dictionary id is rejected", () => {
+  test("invalid dictionary id is rejected", async () => {
     const w = new ByteWriter()
     w.byte(formatByte("specialized", 0))
     w.byte(0)
     w.byte(Opcode.HOST_FULL)
     w.varint(99999)
-    expectDecodeError(w.finish(), "INVALID_DICT_ID")
+    await expectDecodeError(w.finish(), "INVALID_DICT_ID")
   })
 
-  test("unknown format byte is rejected", () => {
-    expectDecodeError(new Uint8Array([0xc0, 0x00]), "UNKNOWN_FORMAT")
-    expectDecodeError(new Uint8Array([0x01, 0x00]), "UNKNOWN_FORMAT")
+  test("unknown format byte is rejected", async () => {
+    await expectDecodeError(new Uint8Array([0xc0, 0x00]), "UNKNOWN_FORMAT")
+    await expectDecodeError(new Uint8Array([0x01, 0x00]), "UNKNOWN_FORMAT")
   })
 
-  test("encryption flag is rejected", () => {
+  test("encryption flag is rejected", async () => {
     const w = new ByteWriter()
     w.byte(formatByte("specialized", 0))
     w.byte(0b1000_0000)
-    expectDecodeError(w.finish(), "ENCRYPTION_NOT_SUPPORTED")
+    await expectDecodeError(w.finish(), "ENCRYPTION_NOT_SUPPORTED")
   })
 
-  test("malformed (never-terminating) varint is rejected", () => {
+  test("malformed (never-terminating) varint is rejected", async () => {
     const w = new ByteWriter()
     w.byte(formatByte("specialized", 0))
     w.byte(0)
     w.byte(Opcode.LITERAL_BYTES)
     for (let i = 0; i < 6; i++) w.byte(0x80)
-    expectDecodeError(w.finish(), "MALFORMED_VARINT")
+    await expectDecodeError(w.finish(), "MALFORMED_VARINT")
   })
 
-  test("non-minimal varint is rejected", () => {
+  test("non-minimal varint is rejected", async () => {
     const w = new ByteWriter()
     w.byte(formatByte("specialized", 0))
     w.byte(0)
     w.byte(Opcode.LITERAL_BYTES)
     w.byte(0x81)
     w.byte(0x00)
-    expectDecodeError(w.finish(), "MALFORMED_VARINT")
+    await expectDecodeError(w.finish(), "MALFORMED_VARINT")
   })
 
-  test("port overflow is rejected", () => {
+  test("port overflow is rejected", async () => {
     const w = new ByteWriter()
     w.byte(formatByte("specialized", 0))
     w.byte(0b0000_0010)
@@ -171,10 +171,10 @@ describe("binary stream hardening", () => {
     w.byte(Opcode.END)
     w.byte(Opcode.PORT)
     w.varint(70000)
-    expectDecodeError(w.finish(), "VALUE_OUT_OF_RANGE")
+    await expectDecodeError(w.finish(), "VALUE_OUT_OF_RANGE")
   })
 
-  test("invalid path segment count is rejected", () => {
+  test("invalid path segment count is rejected", async () => {
     const w = new ByteWriter()
     w.byte(formatByte("specialized", 0))
     w.byte(0)
@@ -183,10 +183,10 @@ describe("binary stream hardening", () => {
     w.bytes(new TextEncoder().encode("example.com"))
     w.byte(Opcode.END)
     w.varint(5000)
-    expectDecodeError(w.finish(), "LIMIT_EXCEEDED")
+    await expectDecodeError(w.finish(), "LIMIT_EXCEEDED")
   })
 
-  test("invalid UTF-8 in literals is rejected", () => {
+  test("invalid UTF-8 in literals is rejected", async () => {
     const w = new ByteWriter()
     w.byte(formatByte("specialized", 0))
     w.byte(0)
@@ -195,30 +195,30 @@ describe("binary stream hardening", () => {
     w.bytes(new Uint8Array([0xff, 0xfe]))
     w.byte(Opcode.END)
     w.varint(0)
-    expectDecodeError(w.finish(), "INVALID_UTF8")
+    await expectDecodeError(w.finish(), "INVALID_UTF8")
   })
 })
 
-describe("decompression guards", () => {
-  test("deflate zip bomb is capped", () => {
+describe("decompression guards", async () => {
+  test("deflate zip bomb is capped", async () => {
     const bomb = zlib.deflateRawSync(Buffer.alloc(1024 * 1024, 0x41))
     const w = new ByteWriter()
     w.byte(formatByte("deflate", 0))
     w.byte(0)
     w.bytes(new Uint8Array(bomb))
-    expectDecodeError(w.finish(), "DECOMPRESSED_TOO_LARGE")
+    await expectDecodeError(w.finish(), "DECOMPRESSED_TOO_LARGE")
   })
 
-  test("garbage compressed data is rejected", () => {
+  test("garbage compressed data is rejected", async () => {
     const w = new ByteWriter()
     w.byte(formatByte("brotli", 0))
     w.byte(0)
     w.bytes(new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]))
-    expectDecodeError(w.finish(), "DECOMPRESSION_FAILED")
+    await expectDecodeError(w.finish(), "DECOMPRESSION_FAILED")
   })
 })
 
-describe("human-mode checksum", () => {
+describe("human-mode checksum", async () => {
   const url = "https://example.com/checksum-test"
 
   function corruptOneChar(s: string): string {
@@ -229,18 +229,18 @@ describe("human-mode checksum", () => {
     return chars.join("")
   }
 
-  test("single substitution is detected", () => {
-    const result = encodeUrl(url)
+  test("single substitution is detected", async () => {
+    const result = await encodeUrl(url)
     const corrupted = corruptOneChar(result.humanPayload)
-    expectDecodeError(corrupted, "CHECKSUM_FAILED")
+    await expectDecodeError(corrupted, "CHECKSUM_FAILED")
   })
 
-  test("deletion is detected", () => {
-    const result = encodeUrl(url)
+  test("deletion is detected", async () => {
+    const result = await encodeUrl(url)
     const stripped = result.humanPayload.replace(/-/g, "")
     const deleted = stripped.slice(0, 3) + stripped.slice(4)
     try {
-      decodePayloadString(deleted)
+      await decodePayloadString(deleted)
       throw new Error("expected failure")
     } catch (e) {
       if (!(e instanceof DecodeError)) throw e
@@ -248,16 +248,16 @@ describe("human-mode checksum", () => {
     }
   })
 
-  test("transposition is detected", () => {
-    const result = encodeUrl(url)
+  test("transposition is detected", async () => {
+    const result = await encodeUrl(url)
     const stripped = result.humanPayload.replace(/-/g, "")
     const swapped = stripped.slice(0, 3) + stripped[4] + stripped[3] + stripped.slice(5)
     if (swapped === stripped) return
-    expectDecodeError(swapped, "CHECKSUM_FAILED")
+    await expectDecodeError(swapped, "CHECKSUM_FAILED")
   })
 
-  test("correction suggestion is either unique-fix or none", () => {
-    const result = encodeUrl(url)
+  test("correction suggestion is either unique-fix or none", async () => {
+    const result = await encodeUrl(url)
     const corrupted = corruptOneChar(result.humanPayload)
     const suggestion = suggestHumanCorrection(corrupted)
     if (suggestion !== null) {
@@ -265,24 +265,24 @@ describe("human-mode checksum", () => {
     }
   })
 
-  test("human payload groups never contain ambiguous characters", () => {
-    const result = encodeUrl(url)
+  test("human payload groups never contain ambiguous characters", async () => {
+    const result = await encodeUrl(url)
     const data = result.humanPayload.replace(/-/g, "")
     expect(data).not.toMatch(/[ilou]/)
   })
 
-  test("human payload that also parses as base64url still decodes via base32", () => {
+  test("human payload that also parses as base64url still decodes via base32", async () => {
     const { model } = canonicalize("https://example.com/fixture")
     const bytes = encodeSpecialized(model, 0)
     const payload = humanEncode(bytes)
-    const decoded = decodePayloadString(payload)
+    const decoded = await decodePayloadString(payload)
     expect(decoded.via).toBe("base32")
     expect(decoded.target).toBe("https://example.com/fixture")
   })
 })
 
-describe("rate limiting", () => {
-  test("limits after configured count within window", () => {
+describe("rate limiting", async () => {
+  test("limits after configured count within window", async () => {
     resetRateLimits()
     const key = "test-ip-1"
     expect(checkRateLimit(key, 3)).toBe(true)
@@ -291,7 +291,7 @@ describe("rate limiting", () => {
     expect(checkRateLimit(key, 3)).toBe(false)
   })
 
-  test("independent keys are independent", () => {
+  test("independent keys are independent", async () => {
     resetRateLimits()
     expect(checkRateLimit("a", 1)).toBe(true)
     expect(checkRateLimit("b", 1)).toBe(true)

@@ -33,7 +33,7 @@ export async function GET(request: Request, context: { params: Promise<{ payload
 
   const start = performance.now()
   try {
-    const decoded = decodePayloadString(encoded)
+    const decoded = await decodePayloadString(encoded)
     validateRedirectTarget(decoded.target)
     const durationMs = performance.now() - start
     return new Response(null, {
