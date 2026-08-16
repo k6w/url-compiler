@@ -1,4 +1,5 @@
 import v0 from "../../data/dictionaries/v0.json"
+import v1 from "../../data/dictionaries/v1.json"
 
 export interface DictionaryData {
   hosts: string[]
@@ -75,6 +76,7 @@ function register(set: DictionarySet): void {
 }
 
 register(buildSet(v0.version, v0))
+register(buildSet(v1.version, v1))
 
 export function getDictionaries(version: number): DictionarySet {
   const set = registry.get(version)

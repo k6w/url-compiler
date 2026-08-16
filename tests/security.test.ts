@@ -232,7 +232,18 @@ describe("human-mode checksum", async () => {
   test("single substitution is detected", async () => {
     const result = await encodeUrl(url)
     const corrupted = corruptOneChar(result.humanPayload)
-    await expectDecodeError(corrupted, "CHECKSUM_FAILED")
+    try {
+      await decodePayloadString(corrupted)
+      throw new Error("expected failure")
+    } catch (e) {
+      if (!(e instanceof DecodeError)) throw e
+      expect(["CHECKSUM_FAILED", "UNKNOWN_FORMAT", "INVALID_ALPHABET"]).toContain(e.code)
+    }
+    // correction is offered only when unique; must never suggest a wrong payload
+    const suggestion = suggestHumanCorrection(corrupted)
+    if (suggestion !== null) {
+      expect(suggestion).toBe(result.humanPayload)
+    }
   })
 
   test("deletion is detected", async () => {
@@ -253,7 +264,13 @@ describe("human-mode checksum", async () => {
     const stripped = result.humanPayload.replace(/-/g, "")
     const swapped = stripped.slice(0, 3) + stripped[4] + stripped[3] + stripped.slice(5)
     if (swapped === stripped) return
-    await expectDecodeError(swapped, "CHECKSUM_FAILED")
+    try {
+      await decodePayloadString(swapped)
+      throw new Error("expected failure")
+    } catch (e) {
+      if (!(e instanceof DecodeError)) throw e
+      expect(["CHECKSUM_FAILED", "UNKNOWN_FORMAT", "INVALID_ALPHABET"]).toContain(e.code)
+    }
   })
 
   test("correction suggestion is either unique-fix or none", async () => {

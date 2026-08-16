@@ -9,7 +9,7 @@ function envNumber(name: string, fallback: number): number {
 export const config = {
   publicOrigin: process.env.PUBLIC_ORIGIN ?? "http://localhost:3000",
   enablePrivateMode: process.env.ENABLE_PRIVATE_MODE === "true",
-  activeDictionaryVersion: envNumber("ACTIVE_DICTIONARY_VERSION", 0),
+  activeDictionaryVersion: envNumber("ACTIVE_DICTIONARY_VERSION", 1),
   maxPayloadLength: envNumber("MAX_PAYLOAD_LENGTH", 2048),
   maxTargetLength: envNumber("MAX_TARGET_LENGTH", 8192),
   maxQueryPairs: envNumber("MAX_QUERY_PAIRS", 64),

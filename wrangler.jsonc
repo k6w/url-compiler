@@ -14,7 +14,7 @@
   "vars": {
     "PUBLIC_ORIGIN": "https://url-compiler.example.workers.dev",
     "ENABLE_PRIVATE_MODE": "false",
-    "ACTIVE_DICTIONARY_VERSION": "0",
+    "ACTIVE_DICTIONARY_VERSION": "1",
     "MAX_PAYLOAD_LENGTH": "2048",
     "MAX_TARGET_LENGTH": "8192"
   }
