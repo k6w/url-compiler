@@ -2,6 +2,9 @@
   "name": "url-compiler",
   "version": "0.1.0",
   "private": true,
+  "bin": {
+    "urlc": "./cli.ts"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,6 +15,7 @@
     "dict:build": "bun tools/build-dictionary.ts",
     "dict:analyze": "bun tools/analyze-corpus.ts",
     "golden:generate": "bun tools/generate-golden.ts",
+    "cli": "bun cli.ts",
     "build:cloudflare": "opennextjs-cloudflare build",
     "preview:cloudflare": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy:cloudflare": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",

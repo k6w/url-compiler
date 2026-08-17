@@ -1,4 +1,6 @@
 import { VOICE_WORDS, voiceWord, voiceIndex } from "./wordlist"
+import { VOICE_WORDS_VI } from "./wordlist-vi"
+import { VOICE_WORDS_JA } from "./wordlist-ja"
 import { DecodeError } from "../codec/types"
 import { config } from "../config"
 
@@ -55,4 +57,31 @@ export function voiceDecode(payload: string): Uint8Array {
 
 export function looksLikeVoice(payload: string): boolean {
   return VOICE_RE.test(payload.trim().toLowerCase())
+}
+
+export type VoiceLocale = "en" | "vi" | "ja"
+
+/**
+ * Localized reading of a canonical voice payload (spec §15: display-only
+ * localized word renderer). The payload itself always decodes via the
+ * canonical English list; this renders the same word indices in another
+ * language for reading aloud.
+ */
+export function renderLocalized(payload: string, locale: VoiceLocale): string {
+  if (locale === "en") return payload
+  const parts = payload.trim().toLowerCase().split("-").filter((p) => p.length > 0)
+  const table = locale === "vi" ? VOICE_WORDS_VI : VOICE_WORDS_JA
+  const out: string[] = []
+  for (const part of parts) {
+    const idx = voiceIndex(part)
+    if (idx === undefined) {
+      throw new DecodeError("INVALID_ALPHABET", `unknown voice word: ${part}`)
+    }
+    const word = table[idx]
+    if (word === undefined) {
+      throw new DecodeError("VALUE_OUT_OF_RANGE", `localized wordlist missing index ${idx}`)
+    }
+    out.push(word)
+  }
+  return out.join(locale === "ja" ? "・" : " ")
 }

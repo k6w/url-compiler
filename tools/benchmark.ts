@@ -1,7 +1,8 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { encodeSpecialized } from "@/lib/codec/specialized"
 import { huffmanV1 } from "@/lib/codec/huffman"
-import { encodeUrl, decodePayloadString, compressFamilyPayload } from "@/lib/codec/candidates"
+import { rcModel } from "@/lib/codec/rangecoder"
+import { encodeUrl, decodePayloadString, compressFamilyPayload, sharedBrotliFamilyPayload } from "@/lib/codec/candidates"
 import { canonicalize } from "@/lib/url/normalize"
 import { base64UrlEncode } from "@/lib/alphabet/base64url"
 import { getDictionaries } from "@/lib/dictionaries/version"
@@ -22,7 +23,7 @@ function base62Encode(bytes: Uint8Array): string {
   return out || "0"
 }
 
-type Strategy = (canonical: string) => string
+type Strategy = (canonical: string) => string | Promise<string>
 
 const strategies: Record<string, Strategy> = {
   "raw-base64url": (canonical) => base64UrlEncode(utf8.encode(canonical)),
@@ -35,7 +36,12 @@ const strategies: Record<string, Strategy> = {
     const { model } = canonicalize(canonical)
     return base64UrlEncode(encodeSpecialized(model, getDictionaries(0).version, { huffman: huffmanV1() }))
   },
+  "specialized-rc": (canonical) => {
+    const { model } = canonicalize(canonical)
+    return base64UrlEncode(encodeSpecialized(model, getDictionaries(0).version, { rangeModel: rcModel() }))
+  },
   brotli: (canonical) => base64UrlEncode(compressFamilyPayload("brotli", canonical)),
+  "brotli-shared-dict": async (canonical) => base64UrlEncode(await sharedBrotliFamilyPayload(canonical)),
   deflate: (canonical) => base64UrlEncode(compressFamilyPayload("deflate", canonical)),
 }
 
@@ -79,7 +85,8 @@ async function main(): Promise<void> {
       const lengths: number[] = []
       const encStart = performance.now()
       for (const canonical of canonicals) {
-        lengths.push(ORIGIN.length + 1 + strategy(canonical).length)
+        const payload = await strategy(canonical)
+        lengths.push(ORIGIN.length + 1 + payload.length)
       }
       const encodeMs = performance.now() - encStart
       rows.push({ category: category.name, strategy: name, ...stats(lengths), encodeMs: Math.round(encodeMs * 100) / 100 })

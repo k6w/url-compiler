@@ -88,7 +88,9 @@ escape-heavy inputs (e.g. some Unicode content) simply keep their v0 encoding. M
 - **Voice** — dictation-friendly words from a frozen 256-word list (one word per byte, 8
   bits/word) plus a position-weighted checksum word: `acid-berry-acorn-…`. Case-insensitive,
   hyphen-separated, significantly longer by design — the value is reading aloud, not density.
-  The wordlist is immutable; changes require a new codec version.
+  The wordlist is immutable; changes require a new codec version. Localized readings
+  (Vietnamese, Japanese) are display-only renderers of the same word indices (spec §15) — the
+  canonical payload stays pure ASCII and always decodes via the English list.
 
 No Unicode or emoji in the canonical payload, ever. Unicode is permitted in destinations (and
 encoded as compact UTF-8 bytes inside literals) but payload alphabets are pure ASCII to avoid
@@ -119,12 +121,20 @@ next version and refuses to touch existing files.
 ## Compression decisions (bench-gated)
 
 - **Brotli / DEFLATE**: emitted candidates, verified round-trip, shortest complete URL wins.
-- **Zstandard**: benchmarked with raw-content dictionary (`bun tools/zstd-bench.ts`) — loses to
-  both on every category (frame overhead dominates at URL scale, dictionary gives zero gain).
-  Rejected; not wired into candidates.
-- **Huffman literals**: implemented as specialized format v1 (spike predicted ~15%, delivered
-  -5–17% per category). Frozen table in `data/dictionaries/huffman-v1.json`; regenerating requires
-  format version 2 (`bun tools/build-huffman.ts` documents the freeze).
+- **Shared-dictionary Brotli** (brotli format version 1): frozen LZ77 dictionary v0 (base64 TS
+  module) ships with the code so payloads never carry it. Encoding uses WASM on Node/Bun
+  (runtimes without it skip the candidate); decoding uses the pure-JS Google implementation so
+  workerd decodes without WebAssembly (verified 302 on real workerd). Held-out evaluation:
+  8/15 wins vs specialized — big gains on token/structural URLs (dict-similar hosts + shapes),
+  automatic fallback on novel-content URLs via per-candidate verification.
+- **Zstandard**: benchmarked with raw-content dictionary — loses everywhere (frame overhead
+  dominates at URL scale). Rejected; not wired.
+- **Huffman literals (format v1)**: emitted; -5–17% per category vs v0.
+- **Range coder (format v2)**: fully implemented and fuzz-verified (carry-propagating rc,
+  static model derived from the frozen huffman lengths), decode supported forever — but NOT
+  emitted: pool framing (~5 bytes) exceeds the ~0.3% entropy gain over Huffman across the
+  entire URL domain, including 2.4 KB payloads. Defined and retained for future large-payload
+  scenarios.
 
 ## Privacy modes (spec §17)
 
@@ -180,12 +190,13 @@ bun install
 bun run dev          # development
 bun run build        # production build
 bun run start        # production server
-bun run test         # bun test (206 tests)
+bun run test         # bun test (422 tests)
 bun run lint         # eslint (Next 16 removed `next lint`; direct eslint is the successor)
 bun run typecheck    # tsc --noEmit
 bun run benchmark    # size/latency benchmark across strategies and categories
 bun run dict:analyze # frequency analysis → dictionary candidates
 bun run dict:build   # draft the next immutable dictionary version
+bun run cli          # CLI: encode/decode/inspect (bun cli.ts --help)
 ```
 
 ## Environment
@@ -247,11 +258,11 @@ are set as Worker vars.
 
 Also works with Cloudflare as a plain CDN/proxy in front of the self-hosted origin.
 
-## Not yet implemented (deliberately)
+## Not yet implemented
 
-Range coding, shared-dictionary Brotli, and localized word renderers — the foundation stays
-small, deterministic, versioned, and perfectly reversible. QR rendering of any mode's URL is
-built into the UI (`uqr`, client-side SVG).
+Nothing on the original roadmap remains open. Possible future work: trained (not corpus-snapshot)
+dictionaries for v2+, more service templates, and a `urlc` npm publish for global CLI install.
+Encode history is stored in `localStorage` only — the server remains fully stateless.
 
 ## Deployment constraints
 

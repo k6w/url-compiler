@@ -1,9 +1,46 @@
 "use client"
 
-import { FormEvent, useMemo, useState } from "react"
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { renderSVG } from "uqr"
+import { voiceIndex } from "@/lib/alphabet/wordlist"
+import { VOICE_WORDS_VI } from "@/lib/alphabet/wordlist-vi"
+import { VOICE_WORDS_JA } from "@/lib/alphabet/wordlist-ja"
 
 type Mode = "ultra" | "human" | "voice" | "private" | "blind"
+type VoiceLocale = "en" | "vi" | "ja"
+
+interface HistoryEntry {
+  url: string
+  mode: Mode
+  shortUrl: string
+  ts: number
+}
+
+const HISTORY_KEY = "url-compiler-history"
+const HISTORY_LIMIT = 15
+
+function loadHistory(): HistoryEntry[] {
+  if (typeof window === "undefined") return []
+  try {
+    const raw = window.localStorage.getItem(HISTORY_KEY)
+    const parsed = raw ? (JSON.parse(raw) as HistoryEntry[]) : []
+    return Array.isArray(parsed) ? parsed.slice(0, HISTORY_LIMIT) : []
+  } catch {
+    return []
+  }
+}
+
+function localizedReading(payload: string, locale: VoiceLocale): string {
+  if (locale === "en") return payload
+  const table = locale === "vi" ? VOICE_WORDS_VI : VOICE_WORDS_JA
+  const parts = payload.toLowerCase().split("-").filter((p) => p.length > 0)
+  return parts
+    .map((p) => {
+      const idx = voiceIndex(p)
+      return idx === undefined ? p : (table[idx] ?? p)
+    })
+    .join(locale === "ja" ? "・" : " ")
+}
 
 const MODES: Array<{ id: Mode; label: string; hint: string }> = [
   { id: "ultra", label: "Ultra", hint: "Unpadded Base64URL, case-sensitive, densest safe alphabet, no separators." },
@@ -48,6 +85,33 @@ export default function Home() {
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showQr, setShowQr] = useState(false)
+  const [locale, setLocale] = useState<VoiceLocale>("en")
+  const [history, setHistory] = useState<HistoryEntry[]>([])
+  const [historyLoaded, setHistoryLoaded] = useState(false)
+
+  useEffect(() => {
+    void Promise.resolve().then(() => {
+      setHistory(loadHistory())
+      setHistoryLoaded(true)
+    })
+  }, [])
+
+  const persistHistory = useCallback((entries: HistoryEntry[]) => {
+    setHistory(entries)
+    try {
+      window.localStorage.setItem(HISTORY_KEY, JSON.stringify(entries))
+    } catch {
+      // storage unavailable (private mode); keep in-memory only
+    }
+  }, [])
+
+  const rememberResult = useCallback(
+    (entry: HistoryEntry) => {
+      const next = [entry, ...loadHistory().filter((h) => h.shortUrl !== entry.shortUrl)].slice(0, HISTORY_LIMIT)
+      persistHistory(next)
+    },
+    [persistHistory],
+  )
 
   const modeHint = useMemo(() => MODES.find((m) => m.id === mode)?.hint ?? "", [mode])
 
@@ -80,6 +144,7 @@ export default function Home() {
         return
       }
       setResult(data as EncodeResponse)
+      rememberResult({ url, mode, shortUrl: data.shortUrl as string, ts: Date.now() })
       if (mode === "ultra" || mode === "human" || mode === "voice") {
         const inspectResponse = await fetch("/api/inspect", {
           method: "POST",
@@ -245,6 +310,29 @@ export default function Home() {
               </a>
             )}
 
+            {mode === "voice" && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs opacity-60">reading:</span>
+                  {(["en", "vi", "ja"] as const).map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => setLocale(l)}
+                      className={`rounded-md px-2 py-0.5 text-xs font-medium transition ${
+                        locale === l ? "bg-blue-600/15 text-blue-700 dark:text-blue-400" : "opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      {l === "en" ? "English" : l === "vi" ? "Tiếng Việt" : "日本語"}
+                    </button>
+                  ))}
+                </div>
+                <p className="break-words rounded-lg bg-black/5 px-3 py-2 text-sm dark:bg-white/5">
+                  {localizedReading(result.payload, locale)}
+                </p>
+              </div>
+            )}
+
             <dl className="grid grid-cols-3 gap-2 text-center">
               <div className="rounded-lg bg-black/5 p-3 dark:bg-white/5">
                 <dt className="text-xs opacity-60">Original</dt>
@@ -288,6 +376,52 @@ export default function Home() {
               </tbody>
             </table>
           </div>
+        </section>
+      )}
+
+      {historyLoaded && history.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold opacity-70">Recent (stored locally in this browser only)</h2>
+            <button
+              type="button"
+              onClick={() => persistHistory([])}
+              className="text-xs opacity-60 underline-offset-2 transition hover:opacity-100 hover:underline"
+            >
+              clear
+            </button>
+          </div>
+          <ul className="flex flex-col gap-2">
+            {history.map((h) => (
+              <li
+                key={h.shortUrl}
+                className="flex items-center gap-3 rounded-lg border border-black/10 bg-white/50 px-3 py-2 text-xs dark:border-white/10 dark:bg-white/5"
+              >
+                <span className="rounded bg-blue-600/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-blue-700 dark:text-blue-400">
+                  {h.mode}
+                </span>
+                <a href={h.shortUrl} className="min-w-0 flex-1 truncate font-mono hover:underline">
+                  {h.shortUrl}
+                </a>
+                <span className="hidden max-w-40 truncate opacity-40 md:inline">{h.url}</span>
+                <button
+                  type="button"
+                  onClick={() => navigator.clipboard.writeText(h.shortUrl).catch(() => undefined)}
+                  className="shrink-0 rounded border border-black/15 px-2 py-0.5 transition hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+                >
+                  copy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => persistHistory(history.filter((x) => x.shortUrl !== h.shortUrl))}
+                  className="shrink-0 opacity-40 transition hover:opacity-100"
+                  aria-label="remove"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

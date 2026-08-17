@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-16T14:43:19.198Z",
+  "generatedAt": "2026-08-17T13:23:48.341Z",
   "origin": "http://localhost:3000",
   "rows": [
     {
@@ -10,7 +10,7 @@
       "avg": 58,
       "min": 46,
       "max": 88,
-      "encodeMs": 0.01,
+      "encodeMs": 1.25,
       "decodeMs": 0
     },
     {
@@ -21,7 +21,7 @@
       "avg": 58,
       "min": 46,
       "max": 88,
-      "encodeMs": 0.09,
+      "encodeMs": 0.41,
       "decodeMs": 0
     },
     {
@@ -32,7 +32,7 @@
       "avg": 43,
       "min": 29,
       "max": 81,
-      "encodeMs": 0.12,
+      "encodeMs": 1.35,
       "decodeMs": 0
     },
     {
@@ -43,7 +43,18 @@
       "avg": 39,
       "min": 29,
       "max": 66,
-      "encodeMs": 0.16,
+      "encodeMs": 1.46,
+      "decodeMs": 0
+    },
+    {
+      "category": "short",
+      "strategy": "specialized-rc",
+      "p50": 45,
+      "p90": 73,
+      "avg": 44,
+      "min": 30,
+      "max": 73,
+      "encodeMs": 0.86,
       "decodeMs": 0
     },
     {
@@ -54,7 +65,18 @@
       "avg": 63,
       "min": 54,
       "max": 77,
-      "encodeMs": 1.09,
+      "encodeMs": 5.45,
+      "decodeMs": 0
+    },
+    {
+      "category": "short",
+      "strategy": "brotli-shared-dict",
+      "p50": 41,
+      "p90": 44,
+      "avg": 42,
+      "min": 40,
+      "max": 44,
+      "encodeMs": 60.9,
       "decodeMs": 0
     },
     {
@@ -65,19 +87,19 @@
       "avg": 61,
       "min": 52,
       "max": 76,
-      "encodeMs": 0.11,
+      "encodeMs": 0.2,
       "decodeMs": 0
     },
     {
       "category": "short",
       "strategy": "auto-selected",
       "p50": 37,
-      "p90": 53,
-      "avg": 37,
+      "p90": 41,
+      "avg": 35,
       "min": 30,
-      "max": 53,
-      "encodeMs": 6.77,
-      "decodeMs": 3.67
+      "max": 41,
+      "encodeMs": 35.57,
+      "decodeMs": 1.96
     },
     {
       "category": "long-paths",
@@ -87,7 +109,7 @@
       "avg": 126,
       "min": 97,
       "max": 142,
-      "encodeMs": 0,
+      "encodeMs": 0.06,
       "decodeMs": 0
     },
     {
@@ -98,7 +120,7 @@
       "avg": 127,
       "min": 98,
       "max": 143,
-      "encodeMs": 0.12,
+      "encodeMs": 0.38,
       "decodeMs": 0
     },
     {
@@ -109,7 +131,7 @@
       "avg": 103,
       "min": 62,
       "max": 130,
-      "encodeMs": 0.07,
+      "encodeMs": 0.49,
       "decodeMs": 0
     },
     {
@@ -120,7 +142,18 @@
       "avg": 86,
       "min": 60,
       "max": 102,
-      "encodeMs": 0.09,
+      "encodeMs": 0.24,
+      "decodeMs": 0
+    },
+    {
+      "category": "long-paths",
+      "strategy": "specialized-rc",
+      "p50": 102,
+      "p90": 109,
+      "avg": 92,
+      "min": 66,
+      "max": 109,
+      "encodeMs": 1.25,
       "decodeMs": 0
     },
     {
@@ -131,7 +164,18 @@
       "avg": 108,
       "min": 93,
       "max": 116,
-      "encodeMs": 1.01,
+      "encodeMs": 3.2,
+      "decodeMs": 0
+    },
+    {
+      "category": "long-paths",
+      "strategy": "brotli-shared-dict",
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 41,
+      "max": 41,
+      "encodeMs": 14.17,
       "decodeMs": 0
     },
     {
@@ -142,19 +186,19 @@
       "avg": 121,
       "min": 98,
       "max": 141,
-      "encodeMs": 0.06,
+      "encodeMs": 0.48,
       "decodeMs": 0
     },
     {
       "category": "long-paths",
       "strategy": "auto-selected",
-      "p50": 76,
-      "p90": 93,
-      "avg": 70,
-      "min": 44,
-      "max": 93,
-      "encodeMs": 3.55,
-      "decodeMs": 3.59
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 41,
+      "max": 41,
+      "encodeMs": 21.27,
+      "decodeMs": 2.31
     },
     {
       "category": "tracking",
@@ -164,7 +208,7 @@
       "avg": 177,
       "min": 137,
       "max": 232,
-      "encodeMs": 0,
+      "encodeMs": 0.09,
       "decodeMs": 0
     },
     {
@@ -175,7 +219,7 @@
       "avg": 178,
       "min": 138,
       "max": 233,
-      "encodeMs": 0.13,
+      "encodeMs": 0.31,
       "decodeMs": 0
     },
     {
@@ -186,7 +230,7 @@
       "avg": 102,
       "min": 80,
       "max": 116,
-      "encodeMs": 0.1,
+      "encodeMs": 0.27,
       "decodeMs": 0
     },
     {
@@ -197,7 +241,18 @@
       "avg": 91,
       "min": 77,
       "max": 100,
-      "encodeMs": 0.46,
+      "encodeMs": 0.64,
+      "decodeMs": 0
+    },
+    {
+      "category": "tracking",
+      "strategy": "specialized-rc",
+      "p50": 101,
+      "p90": 106,
+      "avg": 97,
+      "min": 84,
+      "max": 106,
+      "encodeMs": 1.19,
       "decodeMs": 0
     },
     {
@@ -208,7 +263,18 @@
       "avg": 134,
       "min": 117,
       "max": 156,
-      "encodeMs": 1.73,
+      "encodeMs": 1.56,
+      "decodeMs": 0
+    },
+    {
+      "category": "tracking",
+      "strategy": "brotli-shared-dict",
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 41,
+      "max": 41,
+      "encodeMs": 11.02,
       "decodeMs": 0
     },
     {
@@ -219,19 +285,19 @@
       "avg": 157,
       "min": 126,
       "max": 198,
-      "encodeMs": 0.1,
+      "encodeMs": 0.71,
       "decodeMs": 0
     },
     {
       "category": "tracking",
       "strategy": "auto-selected",
-      "p50": 96,
-      "p90": 98,
-      "avg": 89,
-      "min": 69,
-      "max": 98,
-      "encodeMs": 3.87,
-      "decodeMs": 3.36
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 41,
+      "max": 41,
+      "encodeMs": 18.08,
+      "decodeMs": 2
     },
     {
       "category": "api",
@@ -241,7 +307,7 @@
       "avg": 152,
       "min": 130,
       "max": 164,
-      "encodeMs": 0,
+      "encodeMs": 0.05,
       "decodeMs": 0
     },
     {
@@ -252,7 +318,7 @@
       "avg": 153,
       "min": 131,
       "max": 165,
-      "encodeMs": 0.09,
+      "encodeMs": 0.32,
       "decodeMs": 0
     },
     {
@@ -263,7 +329,7 @@
       "avg": 120,
       "min": 77,
       "max": 157,
-      "encodeMs": 0.07,
+      "encodeMs": 0.17,
       "decodeMs": 0
     },
     {
@@ -274,7 +340,18 @@
       "avg": 101,
       "min": 74,
       "max": 126,
-      "encodeMs": 0.07,
+      "encodeMs": 0.17,
+      "decodeMs": 0
+    },
+    {
+      "category": "api",
+      "strategy": "specialized-rc",
+      "p50": 129,
+      "p90": 133,
+      "avg": 108,
+      "min": 81,
+      "max": 133,
+      "encodeMs": 0.67,
       "decodeMs": 0
     },
     {
@@ -285,7 +362,18 @@
       "avg": 124,
       "min": 121,
       "max": 132,
-      "encodeMs": 1.15,
+      "encodeMs": 1.6,
+      "decodeMs": 0
+    },
+    {
+      "category": "api",
+      "strategy": "brotli-shared-dict",
+      "p50": 41,
+      "p90": 48,
+      "avg": 43,
+      "min": 41,
+      "max": 48,
+      "encodeMs": 11.23,
       "decodeMs": 0
     },
     {
@@ -296,19 +384,19 @@
       "avg": 143,
       "min": 125,
       "max": 156,
-      "encodeMs": 0.07,
+      "encodeMs": 0.44,
       "decodeMs": 0
     },
     {
       "category": "api",
       "strategy": "auto-selected",
-      "p50": 113,
-      "p90": 118,
-      "avg": 86,
-      "min": 50,
-      "max": 118,
-      "encodeMs": 3.07,
-      "decodeMs": 3.1
+      "p50": 41,
+      "p90": 48,
+      "avg": 43,
+      "min": 41,
+      "max": 48,
+      "encodeMs": 14.83,
+      "decodeMs": 1.6
     },
     {
       "category": "uuid",
@@ -318,7 +406,7 @@
       "avg": 146,
       "min": 122,
       "max": 172,
-      "encodeMs": 0,
+      "encodeMs": 0.05,
       "decodeMs": 0
     },
     {
@@ -329,7 +417,7 @@
       "avg": 147,
       "min": 123,
       "max": 173,
-      "encodeMs": 0.09,
+      "encodeMs": 0.21,
       "decodeMs": 0
     },
     {
@@ -340,7 +428,7 @@
       "avg": 97,
       "min": 85,
       "max": 117,
-      "encodeMs": 0.06,
+      "encodeMs": 0.11,
       "decodeMs": 0
     },
     {
@@ -351,7 +439,18 @@
       "avg": 88,
       "min": 78,
       "max": 105,
-      "encodeMs": 0.06,
+      "encodeMs": 0.12,
+      "decodeMs": 0
+    },
+    {
+      "category": "uuid",
+      "strategy": "specialized-rc",
+      "p50": 96,
+      "p90": 112,
+      "avg": 95,
+      "min": 85,
+      "max": 112,
+      "encodeMs": 0.47,
       "decodeMs": 0
     },
     {
@@ -362,7 +461,18 @@
       "avg": 113,
       "min": 96,
       "max": 122,
-      "encodeMs": 0.78,
+      "encodeMs": 1.1,
+      "decodeMs": 0
+    },
+    {
+      "category": "uuid",
+      "strategy": "brotli-shared-dict",
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 41,
+      "max": 41,
+      "encodeMs": 9.38,
       "decodeMs": 0
     },
     {
@@ -373,19 +483,19 @@
       "avg": 129,
       "min": 117,
       "max": 134,
-      "encodeMs": 0.06,
+      "encodeMs": 0.26,
       "decodeMs": 0
     },
     {
       "category": "uuid",
       "strategy": "auto-selected",
-      "p50": 77,
-      "p90": 98,
-      "avg": 79,
-      "min": 69,
-      "max": 98,
-      "encodeMs": 2.26,
-      "decodeMs": 2.73
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 41,
+      "max": 41,
+      "encodeMs": 13.69,
+      "decodeMs": 1.41
     },
     {
       "category": "random-token",
@@ -395,7 +505,7 @@
       "avg": 117,
       "min": 65,
       "max": 202,
-      "encodeMs": 0,
+      "encodeMs": 0.03,
       "decodeMs": 0
     },
     {
@@ -406,7 +516,7 @@
       "avg": 118,
       "min": 65,
       "max": 204,
-      "encodeMs": 0.07,
+      "encodeMs": 0.16,
       "decodeMs": 0
     },
     {
@@ -417,7 +527,7 @@
       "avg": 102,
       "min": 62,
       "max": 190,
-      "encodeMs": 0.05,
+      "encodeMs": 0.07,
       "decodeMs": 0
     },
     {
@@ -428,7 +538,18 @@
       "avg": 90,
       "min": 56,
       "max": 161,
-      "encodeMs": 0.04,
+      "encodeMs": 0.11,
+      "decodeMs": 0
+    },
+    {
+      "category": "random-token",
+      "strategy": "specialized-rc",
+      "p50": 81,
+      "p90": 169,
+      "avg": 97,
+      "min": 62,
+      "max": 169,
+      "encodeMs": 0.56,
       "decodeMs": 0
     },
     {
@@ -439,7 +560,18 @@
       "avg": 110,
       "min": 73,
       "max": 182,
-      "encodeMs": 1.21,
+      "encodeMs": 2.01,
+      "decodeMs": 0
+    },
+    {
+      "category": "random-token",
+      "strategy": "brotli-shared-dict",
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 40,
+      "max": 41,
+      "encodeMs": 11.89,
       "decodeMs": 0
     },
     {
@@ -450,19 +582,19 @@
       "avg": 119,
       "min": 70,
       "max": 197,
-      "encodeMs": 0.05,
+      "encodeMs": 0.32,
       "decodeMs": 0
     },
     {
       "category": "random-token",
       "strategy": "auto-selected",
-      "p50": 66,
-      "p90": 154,
-      "avg": 82,
-      "min": 48,
-      "max": 154,
-      "encodeMs": 3.19,
-      "decodeMs": 3.57
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 40,
+      "max": 41,
+      "encodeMs": 17.63,
+      "decodeMs": 2.1
     },
     {
       "category": "unicode",
@@ -472,7 +604,7 @@
       "avg": 145,
       "min": 88,
       "max": 244,
-      "encodeMs": 0.01,
+      "encodeMs": 0.04,
       "decodeMs": 0
     },
     {
@@ -483,7 +615,7 @@
       "avg": 145,
       "min": 88,
       "max": 245,
-      "encodeMs": 0.12,
+      "encodeMs": 0.19,
       "decodeMs": 0
     },
     {
@@ -494,7 +626,7 @@
       "avg": 84,
       "min": 64,
       "max": 128,
-      "encodeMs": 0.05,
+      "encodeMs": 0.12,
       "decodeMs": 0
     },
     {
@@ -505,7 +637,18 @@
       "avg": 82,
       "min": 60,
       "max": 126,
-      "encodeMs": 0.07,
+      "encodeMs": 0.1,
+      "decodeMs": 0
+    },
+    {
+      "category": "unicode",
+      "strategy": "specialized-rc",
+      "p50": 82,
+      "p90": 133,
+      "avg": 89,
+      "min": 66,
+      "max": 133,
+      "encodeMs": 0.52,
       "decodeMs": 0
     },
     {
@@ -516,7 +659,18 @@
       "avg": 119,
       "min": 90,
       "max": 161,
-      "encodeMs": 1.2,
+      "encodeMs": 1.88,
+      "decodeMs": 0
+    },
+    {
+      "category": "unicode",
+      "strategy": "brotli-shared-dict",
+      "p50": 93,
+      "p90": 156,
+      "avg": 102,
+      "min": 64,
+      "max": 156,
+      "encodeMs": 14.96,
       "decodeMs": 0
     },
     {
@@ -527,7 +681,7 @@
       "avg": 115,
       "min": 93,
       "max": 148,
-      "encodeMs": 0.05,
+      "encodeMs": 0.39,
       "decodeMs": 0
     },
     {
@@ -538,8 +692,8 @@
       "avg": 77,
       "min": 60,
       "max": 128,
-      "encodeMs": 6.33,
-      "decodeMs": 3.45
+      "encodeMs": 20.06,
+      "decodeMs": 1.29
     },
     {
       "category": "ecommerce",
@@ -549,7 +703,7 @@
       "avg": 141,
       "min": 105,
       "max": 212,
-      "encodeMs": 0,
+      "encodeMs": 0.06,
       "decodeMs": 0
     },
     {
@@ -560,7 +714,7 @@
       "avg": 142,
       "min": 106,
       "max": 213,
-      "encodeMs": 0.09,
+      "encodeMs": 0.18,
       "decodeMs": 0
     },
     {
@@ -571,7 +725,7 @@
       "avg": 119,
       "min": 84,
       "max": 196,
-      "encodeMs": 0.08,
+      "encodeMs": 0.13,
       "decodeMs": 0
     },
     {
@@ -582,7 +736,18 @@
       "avg": 99,
       "min": 76,
       "max": 158,
-      "encodeMs": 0.05,
+      "encodeMs": 0.13,
+      "decodeMs": 0
+    },
+    {
+      "category": "ecommerce",
+      "strategy": "specialized-rc",
+      "p50": 89,
+      "p90": 165,
+      "avg": 105,
+      "min": 82,
+      "max": 165,
+      "encodeMs": 0.65,
       "decodeMs": 0
     },
     {
@@ -593,7 +758,18 @@
       "avg": 128,
       "min": 104,
       "max": 173,
-      "encodeMs": 1.19,
+      "encodeMs": 1.88,
+      "decodeMs": 0
+    },
+    {
+      "category": "ecommerce",
+      "strategy": "brotli-shared-dict",
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 40,
+      "max": 41,
+      "encodeMs": 12.28,
       "decodeMs": 0
     },
     {
@@ -604,19 +780,19 @@
       "avg": 139,
       "min": 110,
       "max": 194,
-      "encodeMs": 0.05,
+      "encodeMs": 0.4,
       "decodeMs": 0
     },
     {
       "category": "ecommerce",
       "strategy": "auto-selected",
-      "p50": 84,
-      "p90": 156,
-      "avg": 99,
-      "min": 77,
-      "max": 156,
-      "encodeMs": 3.22,
-      "decodeMs": 3.63
+      "p50": 41,
+      "p90": 41,
+      "avg": 41,
+      "min": 40,
+      "max": 41,
+      "encodeMs": 18.11,
+      "decodeMs": 2.12
     },
     {
       "category": "social",
@@ -626,7 +802,7 @@
       "avg": 95,
       "min": 65,
       "max": 118,
-      "encodeMs": 0,
+      "encodeMs": 0.02,
       "decodeMs": 0
     },
     {
@@ -637,7 +813,7 @@
       "avg": 95,
       "min": 65,
       "max": 119,
-      "encodeMs": 0.07,
+      "encodeMs": 0.08,
       "decodeMs": 0
     },
     {
@@ -648,7 +824,7 @@
       "avg": 73,
       "min": 50,
       "max": 100,
-      "encodeMs": 0.08,
+      "encodeMs": 0.09,
       "decodeMs": 0
     },
     {
@@ -659,7 +835,18 @@
       "avg": 64,
       "min": 46,
       "max": 82,
-      "encodeMs": 0.05,
+      "encodeMs": 0.09,
+      "decodeMs": 0
+    },
+    {
+      "category": "social",
+      "strategy": "specialized-rc",
+      "p50": 68,
+      "p90": 89,
+      "avg": 70,
+      "min": 53,
+      "max": 89,
+      "encodeMs": 0.47,
       "decodeMs": 0
     },
     {
@@ -670,7 +857,18 @@
       "avg": 87,
       "min": 73,
       "max": 100,
-      "encodeMs": 0.96,
+      "encodeMs": 1.34,
+      "decodeMs": 0
+    },
+    {
+      "category": "social",
+      "strategy": "brotli-shared-dict",
+      "p50": 40,
+      "p90": 41,
+      "avg": 40,
+      "min": 40,
+      "max": 41,
+      "encodeMs": 12.22,
       "decodeMs": 0
     },
     {
@@ -681,19 +879,19 @@
       "avg": 94,
       "min": 70,
       "max": 112,
-      "encodeMs": 0.06,
+      "encodeMs": 0.35,
       "decodeMs": 0
     },
     {
       "category": "social",
       "strategy": "auto-selected",
-      "p50": 60,
-      "p90": 66,
-      "avg": 58,
-      "min": 49,
-      "max": 66,
-      "encodeMs": 2.46,
-      "decodeMs": 4.02
+      "p50": 40,
+      "p90": 41,
+      "avg": 40,
+      "min": 40,
+      "max": 41,
+      "encodeMs": 16.44,
+      "decodeMs": 1.71
     },
     {
       "category": "service-template",
@@ -703,7 +901,7 @@
       "avg": 89,
       "min": 80,
       "max": 113,
-      "encodeMs": 0,
+      "encodeMs": 0.02,
       "decodeMs": 0
     },
     {
@@ -714,7 +912,7 @@
       "avg": 89,
       "min": 80,
       "max": 114,
-      "encodeMs": 0.05,
+      "encodeMs": 0.33,
       "decodeMs": 0
     },
     {
@@ -725,7 +923,7 @@
       "avg": 65,
       "min": 46,
       "max": 92,
-      "encodeMs": 0.07,
+      "encodeMs": 0.23,
       "decodeMs": 0
     },
     {
@@ -736,7 +934,18 @@
       "avg": 59,
       "min": 44,
       "max": 81,
-      "encodeMs": 0.06,
+      "encodeMs": 0.18,
+      "decodeMs": 0
+    },
+    {
+      "category": "service-template",
+      "strategy": "specialized-rc",
+      "p50": 64,
+      "p90": 88,
+      "avg": 65,
+      "min": 50,
+      "max": 88,
+      "encodeMs": 0.57,
       "decodeMs": 0
     },
     {
@@ -747,7 +956,18 @@
       "avg": 92,
       "min": 85,
       "max": 110,
-      "encodeMs": 1.2,
+      "encodeMs": 1.96,
+      "decodeMs": 0
+    },
+    {
+      "category": "service-template",
+      "strategy": "brotli-shared-dict",
+      "p50": 40,
+      "p90": 40,
+      "avg": 40,
+      "min": 40,
+      "max": 40,
+      "encodeMs": 14.96,
       "decodeMs": 0
     },
     {
@@ -758,19 +978,19 @@
       "avg": 94,
       "min": 85,
       "max": 118,
-      "encodeMs": 0.04,
+      "encodeMs": 0.37,
       "decodeMs": 0
     },
     {
       "category": "service-template",
       "strategy": "auto-selected",
-      "p50": 53,
-      "p90": 77,
-      "avg": 52,
+      "p50": 40,
+      "p90": 40,
+      "avg": 40,
       "min": 40,
-      "max": 77,
-      "encodeMs": 3.25,
-      "decodeMs": 4
+      "max": 40,
+      "encodeMs": 19.09,
+      "decodeMs": 5.57
     }
   ]
 }
