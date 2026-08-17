@@ -1,8 +1,17 @@
 "use client"
 
-import { FormEvent, useState } from "react"
+import { FormEvent, useMemo, useState } from "react"
+import { renderSVG } from "uqr"
 
-type Mode = "ultra" | "human"
+type Mode = "ultra" | "human" | "voice" | "private" | "blind"
+
+const MODES: Array<{ id: Mode; label: string; hint: string }> = [
+  { id: "ultra", label: "Ultra", hint: "Unpadded Base64URL, case-sensitive, densest safe alphabet, no separators." },
+  { id: "human", label: "Human", hint: "Case-insensitive Base32 (excludes i, l, o), hyphen groups, checksum-protected." },
+  { id: "voice", label: "Voice", hint: "Dictation-friendly words, one word per byte, checksum word. Significantly longer." },
+  { id: "private", label: "Private", hint: "AES-256-GCM encrypted payload. The server can decrypt; requires key configuration." },
+  { id: "blind", label: "Blind", hint: "Key lives in the URL fragment — decrypted by the landing page in the browser, not the server." },
+]
 
 interface EncodeResponse {
   originalUrl: string
@@ -15,7 +24,9 @@ interface EncodeResponse {
   shortenedLength: number
   saved: number
   warning: boolean
-  candidates: { format: string; bytes: number }[]
+  encrypted?: boolean
+  blind?: boolean
+  candidates: { format: string; version: number; bytes: number }[]
 }
 
 interface InspectResponse {
@@ -36,6 +47,18 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [showQr, setShowQr] = useState(false)
+
+  const modeHint = useMemo(() => MODES.find((m) => m.id === mode)?.hint ?? "", [mode])
+
+  const qrSvg = useMemo(() => {
+    if (!result || !showQr) return null
+    try {
+      return renderSVG(result.shortUrl, { border: 2 })
+    } catch {
+      return null
+    }
+  }, [result, showQr])
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -44,6 +67,7 @@ export default function Home() {
     setResult(null)
     setInspect(null)
     setCopied(false)
+    setShowQr(false)
     try {
       const response = await fetch("/api/encode", {
         method: "POST",
@@ -56,13 +80,15 @@ export default function Home() {
         return
       }
       setResult(data as EncodeResponse)
-      const inspectResponse = await fetch("/api/inspect", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ payload: data.payload }),
-      })
-      const inspectData = await inspectResponse.json()
-      if (inspectResponse.ok) setInspect(inspectData as InspectResponse)
+      if (mode === "ultra" || mode === "human" || mode === "voice") {
+        const inspectResponse = await fetch("/api/inspect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ payload: data.payload }),
+        })
+        const inspectData = await inspectResponse.json()
+        if (inspectResponse.ok) setInspect(inspectData as InspectResponse)
+      }
     } catch {
       setError("network error")
     } finally {
@@ -80,6 +106,8 @@ export default function Home() {
       setError("clipboard unavailable")
     }
   }
+
+  const effectiveHref = result?.blind ? `#${result.payload}` : result ? `/${result.payload}` : "#"
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-8 px-6 py-16">
@@ -104,18 +132,18 @@ export default function Home() {
           />
         </label>
 
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex rounded-lg border border-black/15 p-1 text-sm dark:border-white/15">
-            {(["ultra", "human"] as const).map((m) => (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap rounded-lg border border-black/15 p-1 text-sm dark:border-white/15">
+            {MODES.map((m) => (
               <button
-                key={m}
+                key={m.id}
                 type="button"
-                onClick={() => setMode(m)}
-                className={`rounded-md px-4 py-1.5 font-medium transition ${
-                  mode === m ? "bg-blue-600 text-white" : "opacity-70 hover:opacity-100"
+                onClick={() => setMode(m.id)}
+                className={`rounded-md px-3 py-1.5 font-medium transition ${
+                  mode === m.id ? "bg-blue-600 text-white" : "opacity-70 hover:opacity-100"
                 }`}
               >
-                {m === "ultra" ? "Ultra" : "Human"}
+                {m.label}
               </button>
             ))}
           </div>
@@ -139,11 +167,7 @@ export default function Home() {
           </button>
         </div>
 
-        <p className="text-xs opacity-60">
-          {mode === "ultra"
-            ? "Ultra: unpadded Base64URL, case-sensitive, densest safe alphabet, no separators."
-            : "Human: case-insensitive Base32 (excludes i, l, o), hyphen groups, checksum-protected."}
-        </p>
+        <p className="text-xs opacity-60">{modeHint}</p>
       </form>
 
       {error && (
@@ -162,25 +186,64 @@ export default function Home() {
             </div>
           )}
 
+          {result.blind && (
+            <div className="rounded-lg border border-violet-500/40 bg-violet-500/10 px-4 py-3 text-sm text-violet-700 dark:text-violet-400">
+              Server-blind: the decryption key is in the URL fragment after <code>#</code>. This server
+              cannot decrypt the destination; the landing page does it in the browser. Share the full
+              link including the fragment.
+            </div>
+          )}
+
+          {result.encrypted && (
+            <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
+              Private: payload encrypted with AES-256-GCM. Only a server holding the configured key can
+              decode; observers see ciphertext.
+            </div>
+          )}
+
           <div className="flex flex-col gap-3 rounded-xl border border-black/10 bg-white/70 p-5 shadow-sm dark:border-white/10 dark:bg-white/5">
             <div className="flex items-center justify-between gap-3">
               <span className="rounded-md bg-blue-600/10 px-2 py-0.5 font-mono text-xs font-semibold text-blue-700 dark:text-blue-400">
                 {result.format}
               </span>
-              <button
-                type="button"
-                onClick={copy}
-                className="rounded-md border border-black/15 px-3 py-1 text-xs font-medium transition hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
-              >
-                {copied ? "Copied" : "Copy"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowQr((v) => !v)}
+                  className="rounded-md border border-black/15 px-3 py-1 text-xs font-medium transition hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+                >
+                  {showQr ? "Hide QR" : "QR"}
+                </button>
+                <button
+                  type="button"
+                  onClick={copy}
+                  className="rounded-md border border-black/15 px-3 py-1 text-xs font-medium transition hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+                >
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
             </div>
-            <a
-              href={`/${result.payload}`}
-              className="break-all font-mono text-sm underline decoration-blue-500/50 underline-offset-4 hover:decoration-blue-500"
-            >
-              {result.shortUrl}
-            </a>
+
+            {showQr && qrSvg && (
+              <div
+                className="mx-auto w-full max-w-56 [&>svg]:h-auto [&>svg]:w-full"
+                dangerouslySetInnerHTML={{ __html: qrSvg }}
+              />
+            )}
+
+            {result.blind ? (
+              <p className="break-all font-mono text-sm underline decoration-blue-500/50 underline-offset-4">
+                {result.shortUrl.split("#")[0]}
+                <span className="opacity-60">#{result.shortUrl.split("#")[1]}</span>
+              </p>
+            ) : (
+              <a
+                href={effectiveHref}
+                className="break-all font-mono text-sm underline decoration-blue-500/50 underline-offset-4 hover:decoration-blue-500"
+              >
+                {result.shortUrl}
+              </a>
+            )}
 
             <dl className="grid grid-cols-3 gap-2 text-center">
               <div className="rounded-lg bg-black/5 p-3 dark:bg-white/5">
@@ -193,9 +256,7 @@ export default function Home() {
               </div>
               <div className="rounded-lg bg-black/5 p-3 dark:bg-white/5">
                 <dt className="text-xs opacity-60">Saved</dt>
-                <dd className="font-mono text-lg font-semibold">
-                  {result.saved > 0 ? result.saved : result.saved}
-                </dd>
+                <dd className="font-mono text-lg font-semibold">{result.saved}</dd>
               </div>
             </dl>
 
@@ -218,7 +279,7 @@ export default function Home() {
               </thead>
               <tbody>
                 {result.candidates.map((c) => (
-                  <tr key={c.format}>
+                  <tr key={`${c.format}-${c.version}`}>
                     <td className="py-1">{c.format}</td>
                     <td className="py-1">{c.bytes}</td>
                     <td className="py-1">{c.format === result.format ? "selected" : "verified"}</td>

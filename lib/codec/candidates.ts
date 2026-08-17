@@ -13,6 +13,7 @@ import { ByteReader } from "./reader"
 import { modelFromUrlString } from "./raw"
 import { base64UrlDecode, base64UrlEncode } from "../alphabet/base64url"
 import { humanDecode, humanEncode } from "../alphabet/base32"
+import { voiceDecode, voiceEncode, looksLikeVoice } from "../alphabet/voice"
 import {
   DecodeError,
   FLAG_DICT_VERSION_EXT,
@@ -39,8 +40,10 @@ export interface EncodeResult {
   best: PayloadCandidate
   ultraPayload: string
   humanPayload: string
+  voicePayload: string
   ultraUrlLength: number
   humanUrlLength: number
+  voiceUrlLength: number
   warning: boolean
 }
 
@@ -59,6 +62,7 @@ export interface DecodedPayload {
   family: FormatFamily
   formatVersion: number
   dictionaryVersion: number
+  encrypted?: boolean
 }
 
 export async function decodePayloadBytes(bytes: Uint8Array): Promise<DecodedPayload> {
@@ -68,7 +72,7 @@ export async function decodePayloadBytes(bytes: Uint8Array): Promise<DecodedPayl
   if (fmt === null) {
     throw new DecodeError("UNKNOWN_FORMAT", `unsupported format byte: 0x${b0.toString(16)}`)
   }
-  if (fmt.family !== "specialized" && fmt.version !== 0) {
+  if (fmt.family !== "specialized" && fmt.family !== "encrypted" && fmt.version !== 0) {
     throw new DecodeError("UNKNOWN_FORMAT", `unsupported ${fmt.family} format version: ${fmt.version}`)
   }
   if (fmt.family === "specialized" && fmt.version > 1) {
@@ -76,11 +80,28 @@ export async function decodePayloadBytes(bytes: Uint8Array): Promise<DecodedPayl
   }
   const flags = r.readByte()
   if (flags & FLAG_ENCRYPTION) {
-    throw new DecodeError("ENCRYPTION_NOT_SUPPORTED", "encrypted payloads are not supported in this release")
+    throw new DecodeError("ENCRYPTION_NOT_SUPPORTED", "encryption flag is reserved; use the encrypted format family")
   }
   let dictionaryVersion = 0
   if (flags & FLAG_DICT_VERSION_EXT) {
     dictionaryVersion = r.readVarint()
+  }
+
+  if (fmt.family === "encrypted") {
+    if (fmt.version !== 0) {
+      throw new DecodeError("UNKNOWN_FORMAT", `unsupported encrypted format version: ${fmt.version}`)
+    }
+    const envelope = r.rest()
+    if (envelope.length > config.maxDecompressedBytes + 4096) {
+      throw new DecodeError("OVERSIZED_PAYLOAD", "encrypted payload too large")
+    }
+    const { decryptPayload } = await import("../crypto/encryption")
+    const inner = await decryptPayload(envelope)
+    const decoded = await decodePayloadBytes(inner)
+    if (decoded.family === "encrypted") {
+      throw new DecodeError("INVALID_OPCODE", "nested encrypted payloads are not allowed")
+    }
+    return { ...decoded, encrypted: true }
   }
 
   if (fmt.family === "specialized") {
@@ -110,7 +131,7 @@ export async function decodePayloadBytes(bytes: Uint8Array): Promise<DecodedPayl
 }
 
 export interface DecodedVia extends DecodedPayload {
-  via: "base64url" | "base32"
+  via: "base64url" | "base32" | "voice"
 }
 
 const BASE64URL_RE = /^[A-Za-z0-9_-]+$/
@@ -140,6 +161,16 @@ export async function decodePayloadString(payload: string): Promise<DecodedVia> 
   } catch (e) {
     if (e instanceof DecodeError) errors.push(e)
     else throw e
+  }
+  if (looksLikeVoice(payload)) {
+    try {
+      const bytes = voiceDecode(payload)
+      const decoded = await decodePayloadBytes(bytes)
+      return { ...decoded, via: "voice" }
+    } catch (e) {
+      if (e instanceof DecodeError) errors.push(e)
+      else throw e
+    }
   }
   const meaningful = errors.find((e) => e.code !== "INVALID_ALPHABET")
   throw meaningful ?? errors[0] ?? new DecodeError("INVALID_ALPHABET", "undecodable payload")
@@ -188,9 +219,11 @@ export async function encodeUrl(input: string, options: EncodeOptions = {}): Pro
 
   const ultraPayload = base64UrlEncode(best.bytes)
   const humanPayload = humanEncode(best.bytes)
+  const voicePayload = voiceEncode(best.bytes)
   const originLength = config.publicOrigin.length
   const ultraUrlLength = originLength + 1 + ultraPayload.length
   const humanUrlLength = originLength + 1 + humanPayload.length
+  const voiceUrlLength = originLength + 1 + voicePayload.length
 
   return {
     originalUrl: input,
@@ -199,10 +232,33 @@ export async function encodeUrl(input: string, options: EncodeOptions = {}): Pro
     best,
     ultraPayload,
     humanPayload,
+    voicePayload,
     ultraUrlLength,
     humanUrlLength,
+    voiceUrlLength,
     warning: ultraUrlLength >= input.length,
   }
+}
+
+/** Private mode: AES-GCM-wrap the best verified candidate (format family 11). */
+export async function encryptCandidate(result: EncodeResult): Promise<string> {
+  const { encryptPayload, PrivateModeError } = await import("../crypto/encryption")
+  const header = new ByteWriter()
+  header.byte(formatByte("encrypted", 0))
+  header.byte(0)
+  let envelope: Uint8Array
+  try {
+    envelope = await encryptPayload(result.best.bytes)
+  } catch (e) {
+    if (e instanceof PrivateModeError) {
+      throw new DecodeError("KEY_UNAVAILABLE", e.message)
+    }
+    throw e
+  }
+  const out = new Uint8Array(2 + envelope.length)
+  out.set(header.finish())
+  out.set(envelope, 2)
+  return base64UrlEncode(out)
 }
 
 export function completeUrlLength(payloadLength: number): number {

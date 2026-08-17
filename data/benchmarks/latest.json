@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-16T14:45:00.317Z",
+  "generatedAt": "2026-08-17T12:56:51.404Z",
   "total": 49,
   "shortenedCount": 16,
   "categories": [
@@ -12,7 +12,7 @@
       "avgHuman": 46,
       "minUltra": 30,
       "maxUltra": 53,
-      "encodeMs": 1.06,
+      "encodeMs": 1.09,
       "decodeMs": 0.01
     },
     {
@@ -24,7 +24,7 @@
       "avgHuman": 96,
       "minUltra": 44,
       "maxUltra": 93,
-      "encodeMs": 1.23,
+      "encodeMs": 1.24,
       "decodeMs": 0.02
     },
     {
@@ -36,7 +36,7 @@
       "avgHuman": 124,
       "minUltra": 69,
       "maxUltra": 98,
-      "encodeMs": 1.32,
+      "encodeMs": 1.34,
       "decodeMs": 0.02
     },
     {
@@ -48,7 +48,7 @@
       "avgHuman": 120,
       "minUltra": 50,
       "maxUltra": 118,
-      "encodeMs": 1.19,
+      "encodeMs": 1.21,
       "decodeMs": 0.02
     },
     {
@@ -60,8 +60,8 @@
       "avgHuman": 110,
       "minUltra": 69,
       "maxUltra": 98,
-      "encodeMs": 0.96,
-      "decodeMs": 0.02
+      "encodeMs": 2.04,
+      "decodeMs": 0.03
     },
     {
       "category": "random-token",
@@ -72,7 +72,7 @@
       "avgHuman": 114,
       "minUltra": 48,
       "maxUltra": 154,
-      "encodeMs": 2.42,
+      "encodeMs": 1.49,
       "decodeMs": 0.02
     },
     {
@@ -84,8 +84,8 @@
       "avgHuman": 107,
       "minUltra": 60,
       "maxUltra": 128,
-      "encodeMs": 2.4,
-      "decodeMs": 0.05
+      "encodeMs": 1.45,
+      "decodeMs": 0.02
     },
     {
       "category": "ecommerce",
@@ -96,7 +96,7 @@
       "avgHuman": 140,
       "minUltra": 77,
       "maxUltra": 156,
-      "encodeMs": 1.56,
+      "encodeMs": 1.5,
       "decodeMs": 0.02
     },
     {
@@ -108,8 +108,8 @@
       "avgHuman": 77,
       "minUltra": 49,
       "maxUltra": 66,
-      "encodeMs": 1.09,
-      "decodeMs": 0.02
+      "encodeMs": 1.03,
+      "decodeMs": 0.01
     },
     {
       "category": "service-template",
@@ -120,7 +120,7 @@
       "avgHuman": 69,
       "minUltra": 40,
       "maxUltra": 77,
-      "encodeMs": 1.48,
+      "encodeMs": 1.37,
       "decodeMs": 0.02
     }
   ]

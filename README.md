@@ -85,7 +85,10 @@ escape-heavy inputs (e.g. some Unicode content) simply keep their v0 encoding. M
   Aliases accepted on decode: `o→0`, `i→1`, `l→1`; only canonical characters are generated. On
   checksum failure the redirect is refused; a correction is suggested only when exactly one
   single-edit candidate validates.
-- **Voice** — reserved for later (pronounceable words encoding the same payload).
+- **Voice** — dictation-friendly words from a frozen 256-word list (one word per byte, 8
+  bits/word) plus a position-weighted checksum word: `acid-berry-acorn-…`. Case-insensitive,
+  hyphen-separated, significantly longer by design — the value is reading aloud, not density.
+  The wordlist is immutable; changes require a new codec version.
 
 No Unicode or emoji in the canonical payload, ever. Unicode is permitted in destinations (and
 encoded as compact UTF-8 bytes inside literals) but payload alphabets are pure ASCII to avoid
@@ -122,6 +125,25 @@ next version and refuses to touch existing files.
 - **Huffman literals**: implemented as specialized format v1 (spike predicted ~15%, delivered
   -5–17% per category). Frozen table in `data/dictionaries/huffman-v1.json`; regenerating requires
   format version 2 (`bun tools/build-huffman.ts` documents the freeze).
+
+## Privacy modes (spec §17)
+
+Disabled by default (`ENABLE_PRIVATE_MODE=false`); both use AES-256-GCM via WebCrypto — identical
+behavior on Node, Bun, and workerd (verified).
+
+- **Private (server-readable)** — the winning payload candidate is wrapped in the encrypted
+  format family (`11`): `[0xC0][flags][12-byte nonce][ciphertext+tag]`. Decryption tries
+  `PAYLOAD_KEY_CURRENT` then `PAYLOAD_KEY_PREVIOUS`, so key rotation keeps old links alive. The
+  inner payload may be any format family (nesting encrypted-in-encrypted is rejected). GCM
+  authentication makes tampering and wrong keys fail closed. Set keys via env / `wrangler secret`.
+- **Blind (server-blind)** — `https://x.example/p/<ciphertext>#<key>`: an ephemeral per-link key
+  lives in the URL fragment, which browsers never send to servers. The `/p/…` landing page
+  decrypts locally with WebCrypto, displays the destination, and redirects after a 3-second
+  countdown. Honest labeling: the server is blind, the link holder is not — anyone holding the
+  full link (including the fragment) can decrypt.
+
+Encryption is never applied implicitly: ultra/human/voice modes remain plaintext unless the mode
+is explicitly requested.
 
 ## Security
 
@@ -170,11 +192,16 @@ bun run dict:build   # draft the next immutable dictionary version
 
 ```text
 PUBLIC_ORIGIN=https://x.example      # origin used for generated URLs
-ENABLE_PRIVATE_MODE=false            # must stay false; encryption is a stub
-ACTIVE_DICTIONARY_VERSION=0
+ENABLE_PRIVATE_MODE=false            # enables private + blind modes in the API/UI
+PAYLOAD_KEY_CURRENT=                 # 32-byte base64url AES key (new encryptions)
+PAYLOAD_KEY_PREVIOUS=                # optional; keeps old links decodable across rotation
+ACTIVE_DICTIONARY_VERSION=1
 MAX_PAYLOAD_LENGTH=2048
 MAX_TARGET_LENGTH=8192
 ```
+
+On Cloudflare, set secrets with `wrangler secret put PAYLOAD_KEY_CURRENT` (never in `vars`);
+locally use `.dev.vars` (gitignored).
 
 ## Benchmark highlights
 
@@ -222,8 +249,9 @@ Also works with Cloudflare as a plain CDN/proxy in front of the self-hosted orig
 
 ## Not yet implemented (deliberately)
 
-Voice mode, range coding, shared-dictionary Brotli, and encrypted/server-blind modes — the
-foundation stays small, deterministic, versioned, and perfectly reversible first.
+Range coding, shared-dictionary Brotli, and localized word renderers — the foundation stays
+small, deterministic, versioned, and perfectly reversible. QR rendering of any mode's URL is
+built into the UI (`uqr`, client-side SVG).
 
 ## Deployment constraints
 

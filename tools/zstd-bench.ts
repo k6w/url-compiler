@@ -1,5 +1,5 @@
 import zlib from "node:zlib"
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs"
+import { writeFileSync, mkdirSync } from "node:fs"
 import { canonicalize } from "@/lib/url/normalize"
 import corpus from "../data/corpus.json"
 

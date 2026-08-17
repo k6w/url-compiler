@@ -1,12 +1,11 @@
-export type FormatFamily = "specialized" | "brotli" | "deflate"
+export type FormatFamily = "specialized" | "brotli" | "deflate" | "encrypted"
 
 export const FAMILY_BITS = {
   specialized: 0b00,
   brotli: 0b01,
   deflate: 0b10,
+  encrypted: 0b11,
 } as const
-
-export const FAMILY_RESERVED = 0b11
 
 export type FormatVersion = 0
 
@@ -16,8 +15,7 @@ export function formatByte(family: FormatFamily, version: number): number {
 
 export function parseFormatByte(b: number): { family: FormatFamily; version: number } | null {
   const familyBits = b >>> 6
-  if (familyBits === FAMILY_RESERVED) return null
-  const family = (["specialized", "brotli", "deflate"] as const)[familyBits]
+  const family = (["specialized", "brotli", "deflate", "encrypted"] as const)[familyBits]
   return { family, version: b & 0x3f }
 }
 
@@ -34,6 +32,8 @@ export type DecodeErrorCode =
   | "UNKNOWN_FORMAT"
   | "UNSUPPORTED_FLAG"
   | "ENCRYPTION_NOT_SUPPORTED"
+  | "DECRYPTION_FAILED"
+  | "KEY_UNAVAILABLE"
   | "TRUNCATED"
   | "TRAILING_DATA"
   | "INVALID_OPCODE"
