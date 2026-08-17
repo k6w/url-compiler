@@ -6,6 +6,7 @@ import { decodeUtf8Strict } from "./reader"
 import { DecodeError } from "./types"
 import { config } from "../config"
 import type { HuffmanCodes } from "./huffman"
+import { type FreqModel, rcBitsEstimate } from "./rangecoder"
 
 const utf8 = new TextEncoder()
 
@@ -37,8 +38,36 @@ export function withHuffmanCodes<T>(huffman: HuffmanCodes | null, fn: () => T): 
   }
 }
 
+let activeRc: { model: FreqModel; pool: number[] } | null = null
+
+/**
+ * Format v2 mode: literal emissions divert their content into the range-
+ * coded pool (instructions carry only opcode + length) and cost estimates
+ * use the static rc model.
+ */
+export function withRcPool<T>(model: FreqModel | null, pool: number[] | null, fn: () => T): T {
+  const prev = activeRc
+  activeRc = model !== null && pool !== null ? { model, pool } : null
+  try {
+    return fn()
+  } finally {
+    activeRc = prev
+  }
+}
+
 export function literalEmission(text: string): Emission {
   const bytes = utf8.encode(text)
+  const rc = activeRc
+  if (rc !== null) {
+    return {
+      cost: 1 + varintLen(bytes.length) + rcBitsEstimate(rc.model, bytes) / 8,
+      emit: (w) => {
+        w.byte(Opcode.LITERAL_BYTES)
+        w.varint(bytes.length)
+        for (let i = 0; i < bytes.length; i++) rc.pool.push(bytes[i])
+      },
+    }
+  }
   const huff = activeHuffman
   if (huff !== null) {
     let bits = 0

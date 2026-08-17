@@ -20,12 +20,14 @@ import { ByteWriter, type StreamWriter } from "./writer"
 import { BitWriter } from "./bit"
 import { matchTemplate, writeTemplateBody, decodeTemplateBody } from "./templates"
 import type { HuffmanCodes } from "./huffman"
+import { type FreqModel, RangeEncoder, RcLiteralReader, rcBitsEstimate } from "./rangecoder"
 import {
   type Emission,
   literalEmission,
   dictRefEmission,
   contextDictEmission,
   withHuffmanCodes,
+  withRcPool,
   hexToBytes,
   bytesToHex,
   bytesToUuid,
@@ -202,12 +204,18 @@ function encodePath(segments: string[], set: DictionarySet, w: StreamWriter): vo
 export interface SpecializedEncodeOptions {
   /** Format v1: Huffman-coded literals with the frozen table. */
   huffman?: HuffmanCodes
+  /** Format v2: range-coded literal pool with the static model. */
+  rangeModel?: FreqModel
 }
 
 export function encodeSpecialized(model: UrlModel, dictVersion: number, options: SpecializedEncodeOptions = {}): Uint8Array {
   validateModelLimits(model)
   const set = getDictionaries(dictVersion)
   const huffman = options.huffman ?? null
+  const rcModelOption = options.rangeModel ?? null
+  if (huffman !== null && rcModelOption !== null) {
+    throw new Error("huffman and rangeModel are mutually exclusive")
+  }
 
   let flags = 0
   if (model.scheme === "http") flags |= FLAG_HTTP
@@ -217,96 +225,131 @@ export function encodeSpecialized(model: UrlModel, dictVersion: number, options:
   if (model.fragmentPresent) flags |= FLAG_FRAGMENT
   if (dictVersion > 0) flags |= FLAG_DICT_VERSION_EXT
 
-  return withHuffmanCodes(huffman, () => {
-    const genericCore: StreamWriter = huffman ? new BitWriter() : new ByteWriter()
-    cheapest(hostEmissions(model.hostname, set)).emit(genericCore)
+  const pool: number[] = []
+  const result = withRcPool(rcModelOption, rcModelOption !== null ? pool : null, () =>
+    withHuffmanCodes(huffman, () => {
+      const genericCore: StreamWriter = huffman ? new BitWriter() : new ByteWriter()
+      cheapest(hostEmissions(model.hostname, set)).emit(genericCore)
 
-    if (flags & FLAG_CREDENTIALS) {
-      const ub = utf8.encode(model.username ?? "")
-      genericCore.byte(Opcode.USERNAME)
-      genericCore.varint(ub.length)
-      genericCore.bytes(ub)
-      if (model.password !== undefined) {
-        const pb = utf8.encode(model.password)
-        genericCore.byte(Opcode.PASSWORD)
-        genericCore.varint(pb.length)
-        genericCore.bytes(pb)
-      }
-    }
-
-    if (flags & FLAG_PORT) {
-      genericCore.byte(Opcode.PORT)
-      genericCore.varint(model.port!)
-    }
-
-    encodePath(
-      model.pathSegments.map((s) => s.text),
-      set,
-      genericCore,
-    )
-
-    if (flags & FLAG_QUERY) {
-      genericCore.varint(model.query.length)
-      const segmentTexts = model.pathSegments.map((s) => s.text)
-      for (const pair of model.query) {
-        cheapest(queryKeyEmissions(pair.key, set)).emit(genericCore)
-        if (pair.value === null) {
-          genericCore.byte(Opcode.EMPTY_VALUE)
-        } else if (pair.value === "") {
-          genericCore.byte(Opcode.LITERAL_BYTES)
-          genericCore.varint(0)
-        } else if (pair.value === "true") {
-          genericCore.byte(Opcode.BOOLEAN_TRUE)
-        } else if (pair.value === "false") {
-          genericCore.byte(Opcode.BOOLEAN_FALSE)
-        } else {
-          const candidates: Emission[] = queryValueEmissions(pair.value, set)
-          const refIdx = segmentTexts.indexOf(pair.value)
-          if (refIdx >= 0) {
-            candidates.push({
-              cost: 1 + varintLen(refIdx),
-              emit: (w) => {
-                w.byte(Opcode.SEGMENT_BACKREF)
-                w.varint(refIdx)
-              },
-            })
-          }
-          cheapest(candidates).emit(genericCore)
+      if (flags & FLAG_CREDENTIALS) {
+        const ub = utf8.encode(model.username ?? "")
+        genericCore.byte(Opcode.USERNAME)
+        genericCore.varint(ub.length)
+        genericCore.bytes(ub)
+        if (model.password !== undefined) {
+          const pb = utf8.encode(model.password)
+          genericCore.byte(Opcode.PASSWORD)
+          genericCore.varint(pb.length)
+          genericCore.bytes(pb)
         }
       }
-    }
 
-    let body: StreamWriter = genericCore
-    let effectiveFlags = flags
-    const templateMatch = flags & (FLAG_HTTP | FLAG_PORT | FLAG_CREDENTIALS) ? null : matchTemplate(model)
-    if (templateMatch !== null) {
-      const templateBody: StreamWriter = huffman ? new BitWriter() : new ByteWriter()
-      writeTemplateBody(templateBody, templateMatch)
-      if (templateBody.bitLength < genericCore.bitLength) {
-        body = templateBody
-        effectiveFlags = flags & ~FLAG_QUERY
+      if (flags & FLAG_PORT) {
+        genericCore.byte(Opcode.PORT)
+        genericCore.varint(model.port!)
       }
-    }
 
-    if (flags & FLAG_FRAGMENT) {
-      const fb = utf8.encode(model.fragment ?? "")
-      body.byte(Opcode.FRAGMENT)
-      body.varint(fb.length)
-      body.bytes(fb)
-    }
+      encodePath(
+        model.pathSegments.map((s) => s.text),
+        set,
+        genericCore,
+      )
 
-    const header = new ByteWriter()
-    header.byte(formatByte("specialized", huffman ? 1 : 0))
-    header.byte(effectiveFlags)
-    if (effectiveFlags & FLAG_DICT_VERSION_EXT) header.varint(dictVersion)
+      if (flags & FLAG_QUERY) {
+        genericCore.varint(model.query.length)
+        const segmentTexts = model.pathSegments.map((s) => s.text)
+        for (const pair of model.query) {
+          cheapest(queryKeyEmissions(pair.key, set)).emit(genericCore)
+          if (pair.value === null) {
+            genericCore.byte(Opcode.EMPTY_VALUE)
+          } else if (pair.value === "") {
+            genericCore.byte(Opcode.LITERAL_BYTES)
+            genericCore.varint(0)
+          } else if (pair.value === "true") {
+            genericCore.byte(Opcode.BOOLEAN_TRUE)
+          } else if (pair.value === "false") {
+            genericCore.byte(Opcode.BOOLEAN_FALSE)
+          } else {
+            const candidates: Emission[] = queryValueEmissions(pair.value, set)
+            const refIdx = segmentTexts.indexOf(pair.value)
+            if (refIdx >= 0) {
+              candidates.push({
+                cost: 1 + varintLen(refIdx),
+                emit: (w) => {
+                  w.byte(Opcode.SEGMENT_BACKREF)
+                  w.varint(refIdx)
+                },
+              })
+            }
+            cheapest(candidates).emit(genericCore)
+          }
+        }
+      }
 
-    const headerBytes = header.finish()
-    const bodyBytes = body.finish()
-    const out = new Uint8Array(headerBytes.length + bodyBytes.length)
-    out.set(headerBytes)
-    out.set(bodyBytes, headerBytes.length)
-    return out
-  })
+      let body: StreamWriter = genericCore
+      let effectiveFlags = flags
+      let activePool = pool
+      const templateMatch = flags & (FLAG_HTTP | FLAG_PORT | FLAG_CREDENTIALS) ? null : matchTemplate(model)
+      if (templateMatch !== null) {
+        const templateBody: StreamWriter = huffman ? new BitWriter() : new ByteWriter()
+        if (rcModelOption !== null) {
+          const templatePool: number[] = []
+          withRcPool(rcModelOption, templatePool, () => {
+            writeTemplateBody(templateBody as ByteWriter, templateMatch)
+          })
+          const genericTotal = genericCore.bitLength / 8 + rcBitsEstimate(rcModelOption, Uint8Array.from(pool)) / 8
+          const templateTotal = templateBody.bitLength / 8 + rcBitsEstimate(rcModelOption, Uint8Array.from(templatePool)) / 8
+          if (templateTotal < genericTotal) {
+            body = templateBody
+            activePool = templatePool
+            effectiveFlags = flags & ~FLAG_QUERY
+          }
+        } else {
+          writeTemplateBody(templateBody, templateMatch)
+          if (templateBody.bitLength < genericCore.bitLength) {
+            body = templateBody
+            effectiveFlags = flags & ~FLAG_QUERY
+          }
+        }
+      }
+
+      if (flags & FLAG_FRAGMENT) {
+        const fb = utf8.encode(model.fragment ?? "")
+        body.byte(Opcode.FRAGMENT)
+        body.varint(fb.length)
+        body.bytes(fb)
+      }
+
+      const header = new ByteWriter()
+      header.byte(formatByte("specialized", rcModelOption !== null ? 2 : huffman !== null ? 1 : 0))
+      header.byte(effectiveFlags)
+      if (effectiveFlags & FLAG_DICT_VERSION_EXT) header.varint(dictVersion)
+
+      const headerBytes = header.finish()
+      const bodyBytes = body.finish()
+
+      if (rcModelOption === null) {
+        const out = new Uint8Array(headerBytes.length + bodyBytes.length)
+        out.set(headerBytes)
+        out.set(bodyBytes, headerBytes.length)
+        return out
+      }
+
+      const encoder = new RangeEncoder()
+      for (const b of activePool) encoder.encodeSymbol(rcModelOption, b)
+      const poolBytes = activePool.length > 0 ? encoder.flush() : new Uint8Array(0)
+      const lenPrefix = new ByteWriter()
+      lenPrefix.varint(poolBytes.length)
+      const lenBytes = lenPrefix.finish()
+      const out = new Uint8Array(headerBytes.length + lenBytes.length + poolBytes.length + bodyBytes.length)
+      out.set(headerBytes)
+      out.set(lenBytes, headerBytes.length)
+      out.set(poolBytes, headerBytes.length + lenBytes.length)
+      out.set(bodyBytes, headerBytes.length + lenBytes.length + poolBytes.length)
+      return out
+    }),
+  )
+  return result
 }
 
 function decodeSpecializedTemplate(r: Reader, flags: number): UrlModel {

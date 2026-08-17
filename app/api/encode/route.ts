@@ -20,6 +20,11 @@ function b64url(bytes: Uint8Array): string {
   return Buffer.from(bytes).toString("base64url")
 }
 
+function candidateName(format: string, version: number): string {
+  if (format !== "specialized" || version === 0) return format
+  return version === 1 ? "specialized+huffman" : version === 2 ? "specialized+rc" : `specialized+v${version}`
+}
+
 export async function POST(request: Request) {
   if (!checkRateLimit(`encode:${clientKey(request)}`, config.rateLimitEncode)) {
     return Response.json({ error: "rate_limited" }, { status: 429 })
@@ -66,7 +71,7 @@ export async function POST(request: Request) {
         warning: shortUrl.length >= url.length,
         encrypted: true,
         candidates: result.candidates.map((c) => ({
-          format: c.format === "specialized" && c.version === 1 ? "specialized+huffman" : c.format,
+          format: candidateName(c.format, c.version),
           version: c.version,
           bytes: c.bytes.length,
         })),
@@ -92,7 +97,7 @@ export async function POST(request: Request) {
         warning: shortUrl.length >= url.length,
         blind: true,
         candidates: result.candidates.map((c) => ({
-          format: c.format === "specialized" && c.version === 1 ? "specialized+huffman" : c.format,
+          format: candidateName(c.format, c.version),
           version: c.version,
           bytes: c.bytes.length,
         })),
@@ -106,7 +111,7 @@ export async function POST(request: Request) {
       originalUrl: result.originalUrl,
       canonical: result.canonical,
       mode,
-      format: result.best.format === "specialized" && result.best.version === 1 ? "specialized+huffman" : result.best.format,
+      format: candidateName(result.best.format, result.best.version),
       payload,
       shortUrl,
       originalLength: url.length,

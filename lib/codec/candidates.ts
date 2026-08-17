@@ -5,8 +5,9 @@ import { toUrl } from "../url/model"
 import { DictionaryVersionError, getDictionaries, isSupportedDictionaryVersion, supportedDictionaryVersions } from "../dictionaries/version"
 import { decodeSpecialized, encodeSpecialized } from "./specialized"
 import { huffmanV1 } from "./huffman"
+import { rcModel, RcLiteralReader } from "./rangecoder"
 import { BitReader } from "./bit"
-import { brotliCompress, brotliDecompressToString } from "./brotli"
+import { brotliCompress, brotliDecompressToString, sharedBrotliCompress, sharedBrotliDecompressToString } from "./brotli"
 import { deflateCompress, deflateDecompressToString } from "./deflate"
 import { ByteWriter } from "./writer"
 import { ByteReader } from "./reader"
@@ -57,6 +58,16 @@ export function compressFamilyPayload(family: "brotli" | "deflate", canonical: s
   return w.finish()
 }
 
+export async function sharedBrotliFamilyPayload(canonical: string): Promise<Uint8Array> {
+  const data = utf8.encode(canonical)
+  const compressed = await sharedBrotliCompress(data)
+  const w = new ByteWriter()
+  w.byte(formatByte("brotli", 1))
+  w.byte(0)
+  w.bytes(compressed)
+  return w.finish()
+}
+
 export interface DecodedPayload {
   target: string
   family: FormatFamily
@@ -72,11 +83,14 @@ export async function decodePayloadBytes(bytes: Uint8Array): Promise<DecodedPayl
   if (fmt === null) {
     throw new DecodeError("UNKNOWN_FORMAT", `unsupported format byte: 0x${b0.toString(16)}`)
   }
-  if (fmt.family !== "specialized" && fmt.family !== "encrypted" && fmt.version !== 0) {
+  if (fmt.family !== "specialized" && fmt.family !== "encrypted" && fmt.family !== "brotli" && fmt.version !== 0) {
     throw new DecodeError("UNKNOWN_FORMAT", `unsupported ${fmt.family} format version: ${fmt.version}`)
   }
-  if (fmt.family === "specialized" && fmt.version > 1) {
+  if (fmt.family === "specialized" && fmt.version > 2) {
     throw new DecodeError("UNKNOWN_FORMAT", `unsupported specialized format version: ${fmt.version}`)
+  }
+  if (fmt.family === "brotli" && fmt.version > 1) {
+    throw new DecodeError("UNKNOWN_FORMAT", `unsupported brotli format version: ${fmt.version}`)
   }
   const flags = r.readByte()
   if (flags & FLAG_ENCRYPTION) {
@@ -114,14 +128,23 @@ export async function decodePayloadBytes(bytes: Uint8Array): Promise<DecodedPayl
       }
       throw e
     }
-    const reader = fmt.version === 1 ? (new BitReader(r.rest(), huffmanV1()) as never) : r
+    const reader =
+      fmt.version === 1
+        ? (new BitReader(r.rest(), huffmanV1()) as never)
+        : fmt.version === 2
+          ? new RcLiteralReader(r, r.readBytes(r.readVarint()), rcModel())
+          : r
     const model = decodeSpecialized(reader, flags, set)
     return { target: toUrl(model), family: fmt.family, formatVersion: fmt.version, dictionaryVersion }
   }
 
   const rest = r.rest()
   const urlStr =
-    fmt.family === "brotli" ? await brotliDecompressToString(rest) : await deflateDecompressToString(rest)
+    fmt.family === "brotli"
+      ? fmt.version === 1
+        ? await sharedBrotliDecompressToString(rest)
+        : await brotliDecompressToString(rest)
+      : await deflateDecompressToString(rest)
   try {
     const model = modelFromUrlString(urlStr)
     return { target: toUrl(model), family: fmt.family, formatVersion: fmt.version, dictionaryVersion: 0 }
@@ -193,6 +216,16 @@ export async function encodeUrl(input: string, options: EncodeOptions = {}): Pro
     { format: "brotli", version: 0, bytes: compressFamilyPayload("brotli", canonical), canonical },
     { format: "deflate", version: 0, bytes: compressFamilyPayload("deflate", canonical), canonical },
   ]
+  try {
+    drafts.push({
+      format: "brotli",
+      version: 1,
+      bytes: await sharedBrotliFamilyPayload(canonical),
+      canonical,
+    })
+  } catch {
+    // wasm shared-brotli unavailable on this runtime; skip the candidate
+  }
 
   const candidates: PayloadCandidate[] = []
   for (const draft of drafts) {

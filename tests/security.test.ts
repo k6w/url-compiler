@@ -131,14 +131,14 @@ describe("binary stream hardening", async () => {
   })
 
   test("unknown format byte is rejected", async () => {
-    await expectDecodeError(new Uint8Array([0x02, 0x00]), "UNKNOWN_FORMAT")
-    await expectDecodeError(new Uint8Array([0x41, 0x00]), "UNKNOWN_FORMAT")
+    await expectDecodeError(new Uint8Array([0x42, 0x00]), "UNKNOWN_FORMAT")
     await expectDecodeError(new Uint8Array([0x81, 0x00]), "UNKNOWN_FORMAT")
+    await expectDecodeError(new Uint8Array([0xc1, 0x00]), "UNKNOWN_FORMAT")
   })
 
   test("oversized specialized format version is rejected", async () => {
     const w = new ByteWriter()
-    w.byte(formatByte("specialized", 2))
+    w.byte(formatByte("specialized", 3))
     w.byte(0)
     await expectDecodeError(w.finish(), "UNKNOWN_FORMAT")
   })
