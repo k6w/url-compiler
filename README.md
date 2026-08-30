@@ -1,192 +1,316 @@
+<div align="center">
+
 # URL Compiler
 
-A **stateless URL shortener**. No database, no stored destinations, no lookup table. Every short URL
-contains the complete information needed to reconstruct its destination.
+**A stateless URL shortener.** No database, no stored destinations, no lookup table.
+Every short link carries its whole destination inside itself.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/compiled-ultra.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/media/compiled-ultra-light.png">
+  <img alt="The compiler measuring a 61-character URL down to 37 characters, with every competing encoder listed below it" src="docs/media/compiled-ultra.png" width="820">
+</picture>
+
+</div>
+
+---
+
+## The idea in ten seconds
 
 ```text
-https://www.example.com/products/12345?utm_source=google&id=7   (61 chars)
-→ http://localhost:3000/AAgnAAIiCPLAAQIjJiFH                    (42 chars)
+https://www.example.com/products/12345?utm_source=google&id=7   61 chars
+https://x.example/ACgBJgACBSkuAiEqK0c                           37 chars
 ```
 
-```text
-URL parser → semantic normalizer → typed token compiler → dictionary optimizer
-→ candidate compressor → shortest safe alphabet → stateless redirect
+That second URL is not a database key. It is the first one, compiled: parsed into a typed model,
+compressed into a binary instruction stream, and re-encoded in the shortest safe alphabet. Nothing
+was written down anywhere. Delete the server, rebuild it on another continent from this source, and
+the link still resolves.
+
+The catch is stated up front, in the interface and here: **a stateless URL cannot always be
+shorter.** Short, random, or already-compact URLs come out longer, and the app says so with exact
+counts instead of pretending otherwise.
+
+## Try it
+
+```bash
+bun install
+bun run dev          # http://localhost:3000
+bun run cli encode "https://github.com/anthropics/claude-code/issues/1234"
 ```
 
 ## How it works
 
-1. **Parse** the destination with the platform `URL` parser into a typed model (scheme, host, path
-   segments, ordered query pairs, fragment). Malformed URLs are rejected immediately.
-2. **Normalize** safely: lowercase host (platform), default-port removal (platform), implicit HTTPS,
-   percent-decode of *unreserved* escapes only (`%41` → `A`, UTF-8 text). Reserved escapes
-   (`%2F`, `%2B`, `%26`, `%3D`) are preserved verbatim. Query order, duplicate keys, `?flag` vs
-   `?flag=`, bare `?`/`#` markers, and trailing slashes all round-trip exactly.
-3. **Compile** the model into a compact binary instruction stream with typed opcodes: dictionary
-   references (hosts, host labels, effective suffixes, path tokens, query keys, common values),
-   inline small integers (0–31 in a single byte), inline dictionary ids 0–31, zigzag varint
-   integers, UUIDs (16 bytes), hex byte runs, booleans, empty-value markers, `REPEAT` and
-   `BACKREF` for path compression. Path segments are optimized with dynamic programming, not greedy
-   matching — a 2-character literal can beat an opcode plus dictionary id, and the encoder knows it.
-4. **Compete** multiple candidates — specialized bytecode, Brotli, DEFLATE — verify each one
-   round-trips (`decode(encode(url)) === canonical`), and return whichever produces the **shortest
-   complete URL** (`origin + "/" + payload`).
-5. **Redirect** statelessly: payload → alphabet decode → envelope → bytecode decode → validate →
-   302. Decode latency is reported via `Server-Timing`.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/pipeline.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/media/pipeline-light.svg">
+  <img alt="Pipeline: parse, normalize and build a typed model, then run every encoder in parallel; the shortest candidate that decodes back exactly is the one that ships" src="docs/media/pipeline.svg">
+</picture>
 
-A stateless URL cannot always be shorter than the original. Short, random, or
-already-compact URLs may grow — the UI and API report an explicit warning with exact
-`Original / Shortened / Saved` counts instead of pretending otherwise.
+1. **Parse** with the platform `URL` parser into a typed model — scheme, host, path segments,
+   ordered query pairs, fragment. Malformed URLs are rejected immediately.
+2. **Normalize** conservatively: lowercase host, default-port removal, implicit HTTPS,
+   percent-decoding of *unreserved* escapes only (`%41` → `A`). Reserved escapes (`%2F`, `%2B`,
+   `%26`, `%3D`) survive verbatim. Query order, duplicate keys, `?flag` vs `?flag=`, bare `?`/`#`
+   markers and trailing slashes all round-trip exactly.
+3. **Compile** into a binary instruction stream of typed opcodes: dictionary references, inline
+   small integers, zigzag varints, UUIDs, hex runs, booleans, `REPEAT` and `BACKREF`. Path segments
+   are optimized by dynamic programming, not greedy matching — a two-character literal can beat an
+   opcode plus a dictionary id, and the encoder knows it.
+4. **Compete.** Specialized bytecode, Brotli, shared-dictionary Brotli and DEFLATE all run. Each
+   candidate must satisfy `decode(encode(url)) === canonical` before it is eligible. The shortest
+   *verified* one wins; the rest are discarded.
+5. **Redirect** statelessly: payload → alphabet decode → envelope → bytecode decode → validate →
+   302. Decode latency is reported in `Server-Timing`.
+
+## Three alphabets, one payload
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/modes.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/media/modes-light.svg">
+  <img alt="The same destination rendered in Ultra, Human and Voice alphabets, with their character counts compared" src="docs/media/modes.svg">
+</picture>
+
+| Mode | Alphabet | Use it when |
+| --- | --- | --- |
+| **Ultra** | Unpadded Base64URL, case-sensitive, no separators | APIs, QR codes, copy-paste |
+| **Human** | Crockford-style Base32 (`i l o u` excluded), hyphen groups of 4, Luhn-mod-32 checksum | Someone has to retype it |
+| **Voice** | 256-word list, one word per byte, plus a checksum word | Someone has to say it aloud |
+
+Human mode accepts `o→0`, `i→1`, `l→1` on decode but only ever generates canonical characters. On
+checksum failure the redirect is refused, and a correction is suggested only when exactly one
+single-edit candidate validates.
+
+Voice mode is longer by design — the value is reading it down a phone line, not density. The
+wordlist is immutable; changes require a new codec version. Vietnamese and Japanese readings are
+display-only renderers of the same word indices (spec §15): the canonical payload stays pure ASCII
+and always decodes through the English list.
+
+> No Unicode or emoji in the canonical payload, ever. Unicode is welcome in *destinations* (encoded
+> as compact UTF-8 inside literals), but payload alphabets stay pure ASCII to avoid homograph,
+> normalization and percent-encoding abuse (UTS #39).
+
+## The interface
+
+<table>
+<tr>
+<td width="50%"><img alt="Landing page with an empty measure rail waiting for a URL" src="docs/media/landing.png"></td>
+<td width="50%"><img alt="Voice mode showing the word payload and its Japanese reading" src="docs/media/compiled-voice.png"></td>
+</tr>
+<tr>
+<td><b>Idle.</b> The ruler is visible before you use it, so the units are obvious.</td>
+<td><b>Voice mode.</b> One word per byte, with localized readings of the same indices.</td>
+</tr>
+<tr>
+<td><img alt="A QR code rendered for the compiled link with SVG and PNG download buttons" src="docs/media/qr.png"></td>
+<td><img alt="A short URL that got longer, with an explicit warning" src="docs/media/not-shorter.png"></td>
+</tr>
+<tr>
+<td><b>QR.</b> Always dark-on-white regardless of theme, so it actually scans.</td>
+<td><b>Honest failure.</b> When the compiled link is longer, it says so.</td>
+</tr>
+</table>
+
+<details>
+<summary><b>Server-blind links, and how they look on arrival</b></summary>
+
+<br>
+
+<img alt="The blind landing page decrypting a destination in the browser" src="docs/media/blind-landing.png">
+
+The key lives in the URL fragment, which browsers never send to a server. The landing page decrypts
+locally, shows the destination, and offers a **Stay here** escape from the three-second countdown.
+
+Honest labelling: the server is blind, the link holder is not. Anyone holding the whole link —
+fragment included — can decrypt it.
+
+</details>
+
+## Does it actually make links shorter?
+
+Sometimes. Here is every benchmark category, wins and losses alike:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/benchmark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/media/benchmark-light.svg">
+  <img alt="Average URL length before and after compiling, by category. Eight categories shrink; short and unicode URLs grow." src="docs/media/benchmark.svg">
+</picture>
+
+Tracking-heavy, UUID, API and e-commerce URLs collapse to roughly a third of their length. Already
+short URLs grow by about 30%, and Unicode-heavy URLs roughly double — the payload has to carry those
+bytes and Base64 costs 4 characters per 3 bytes.
+
+Payload-level comparison against a raw Base64URL baseline (average bytes, from
+`data/benchmarks/benchmark.json`):
+
+```text
+category           raw-b64url   specialized   auto-selected   ratio
+tracking                  177           102              41   0.232
+uuid                      146            97              41   0.281
+api                       152           120              43   0.283
+long-paths                126           103              41   0.325
+service-template           89            65              40   0.449
+unicode                   145            84              77   0.531
+```
+
+`auto-selected` beats `specialized` because shared-dictionary Brotli wins on structural URLs.
+The regression baseline lives in `data/benchmarks/baseline.json`; corpus tests fail on a >5%
+category regression.
 
 ## Binary format
 
-```text
-byte 0   format/version:
-           00xxxxxx  specialized URL bytecode
-                      version 0: raw literals
-                      version 1: canonical-Huffman literals (bit-packed stream)
-           01xxxxxx  Brotli-compressed canonical URL (version 0)
-           10xxxxxx  DEFLATE-compressed canonical URL (version 0)
-           11xxxxxx  reserved (encrypted variants)
-byte 1   flags:
-           bit 0 http (HTTPS implicit)    bit 4 fragment present
-           bit 1 custom port              bit 5 dictionary-version varint present
-           bit 2 credentials present      bit 6 checksum present (reserved)
-           bit 3 query present            bit 7 encryption present (rejected in decode)
-[dict version varint]  if bit 5
-[instruction stream]   byte-aligned (v0) or MSB-first bit-packed (v1)
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/envelope.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/media/envelope-light.svg">
+  <img alt="Byte map of the payload envelope: byte 0 carries a 2-bit format family and 6-bit version, byte 1 carries eight flags, then an optional dictionary varint and the instruction stream" src="docs/media/envelope.svg">
+</picture>
 
-Instruction stream: host section (`HOST_FULL` / labels + `SUFFIX` / literal, terminated by `END`),
-optional credentials, optional `PORT`, path segment count + DP-optimized segment instructions,
-optional query pair count + typed key/value instructions, optional `FRAGMENT`.
+The instruction stream is a host section (`HOST_FULL` / labels + `SUFFIX` / literal, terminated by
+`END`), optional credentials, optional `PORT`, a path segment count with DP-optimized segment
+instructions, an optional query pair count with typed key/value instructions, and an optional
+`FRAGMENT`.
 
 Inline ranges: `0x20–0x3F` = context-dependent `DICTIONARY_0..31`, `0x40–0x5F` = `INTEGER_0..31`.
-Varints are LEB128, ≤5 bytes, minimal (overlong encodings rejected). All reads are bounds-checked;
-truncated streams, invalid opcodes, out-of-range dictionary ids, non-UTF-8 literals, and
-decompression output over 64 KiB are rejected with typed `DecodeError`s.
+All reads are bounds-checked; truncated streams, invalid opcodes, out-of-range dictionary ids,
+non-UTF-8 literals and oversized decompression output are rejected with typed `DecodeError`s.
 
-### Format v1: Huffman literals
+<details>
+<summary><b>Format v1: Huffman literals</b></summary>
 
-In v1 the instruction stream is bit-packed (MSB-first). Opcodes, varints, and typed values still
-occupy 8-bit groups; only `LITERAL_BYTES` content is coded with a frozen canonical Huffman table
-(`data/dictionaries/huffman-v1.json`, 111 symbols + escape, avg 5.84 bits/byte). Bytes outside the
-table use an escape code (9 bits + 8 raw bits), so every input remains encodable. Credentials and
-fragments stay raw. The table is immutable — any change requires format version 2. v0 and v1 are
-emitted as competing candidates; each is verified round-trip and the shortest complete URL wins, so
-escape-heavy inputs (e.g. some Unicode content) simply keep their v0 encoding. Measured:
--5–17% payload on every benchmark category vs v0, zero effect on v0 payloads (golden tests).
+<br>
 
-## Modes
+In v1 the instruction stream is bit-packed MSB-first. Opcodes, varints and typed values still occupy
+8-bit groups; only `LITERAL_BYTES` content is coded with a frozen canonical Huffman table
+(`data/dictionaries/huffman-v1.json`, 111 symbols plus an escape, averaging 5.84 bits/byte). Bytes
+outside the table use an escape code (9 bits + 8 raw bits), so every input stays encodable.
+Credentials and fragments stay raw.
 
-- **Ultra** — unpadded Base64URL, case-sensitive, no separators, no checksum. Densest safe
-  alphabet for APIs, QR codes, and copy-paste.
-- **Human** — case-insensitive Crockford-style Base32 (`0-9` + `abcdefghjkmnpqrstvwxyz`, excluding
-  `i l o u`), hyphen groups of 4, Luhn-mod-32 checksum (1 check char ≤16 data chars, 2 above).
-  Aliases accepted on decode: `o→0`, `i→1`, `l→1`; only canonical characters are generated. On
-  checksum failure the redirect is refused; a correction is suggested only when exactly one
-  single-edit candidate validates.
-- **Voice** — dictation-friendly words from a frozen 256-word list (one word per byte, 8
-  bits/word) plus a position-weighted checksum word: `acid-berry-acorn-…`. Case-insensitive,
-  hyphen-separated, significantly longer by design — the value is reading aloud, not density.
-  The wordlist is immutable; changes require a new codec version. Localized readings
-  (Vietnamese, Japanese) are display-only renderers of the same word indices (spec §15) — the
-  canonical payload stays pure ASCII and always decodes via the English list.
+The table is immutable — changing it would require format version 2. v0 and v1 compete as separate
+candidates and each is verified, so escape-heavy inputs simply keep their v0 encoding. Measured:
+−5% to −17% payload on every benchmark category versus v0, and zero effect on v0 payloads (proven by
+golden tests).
 
-No Unicode or emoji in the canonical payload, ever. Unicode is permitted in destinations (and
-encoded as compact UTF-8 bytes inside literals) but payload alphabets are pure ASCII to avoid
-homograph, normalization, and percent-encoding abuse (UTS #39 concerns).
+</details>
 
-## Service templates
+<details>
+<summary><b>Service templates</b></summary>
 
-`lib/codec/templates.ts` — versioned, immutable-ID templates that absorb host + path + query
-structure into a single opcode when they win on size. **Exact-form semantics**: reconstruction is
-byte-identical to the input; anything that would be dropped or rewritten (alternate hosts like
-`m.youtube.com`, `t=1m30s` durations, `/gp/product` paths, ref queries) blocks the template and
-falls back to generic bytecode — no silent canonicalization. YouTube watch/shorts (per-host IDs),
-GitHub repo/issues/pull, Amazon ASIN.
+<br>
 
-## Dictionaries
+`lib/codec/templates.ts` holds versioned, immutable-ID templates that absorb host, path and query
+structure into a single opcode when they win on size. YouTube watch/shorts (per-host IDs), GitHub
+repo/issues/pull, and Amazon ASIN are covered.
 
-`data/dictionaries/v0.json` and `v1.json` are **immutable forever**: `hosts`, `labels`,
-`suffixes` (multi-label PSL-style: `co.uk`, `github.io`, …), `paths`, `queryKeys`, `values`. IDs
-never change meaning; new dictionaries get new version numbers, are selected by an envelope flag +
-varint, and every old version stays decodable (golden tests prove it across versions).
+**Exact-form semantics**: reconstruction is byte-identical to the input. Anything that would be
+dropped or rewritten — alternate hosts like `m.youtube.com`, `t=1m30s` durations, `/gp/product`
+paths, ref queries — blocks the template and falls back to generic bytecode. No silent
+canonicalization, ever.
 
-v1 is active: frequency-tuned inline-32 slots + new tokens, **-12.2% corpus payload** vs v0. The
-builder guards against overfitting: `--min-count` frequency floor (default 2) and an entropy/shape
-filter reject single-occurrence and random-looking tokens — dictionaries must generalize, not
-memorize the corpus. `bun run dict:analyze` proposes candidates; `bun run dict:build` drafts the
-next version and refuses to touch existing files.
+</details>
 
-## Compression decisions (bench-gated)
+<details>
+<summary><b>Dictionaries</b></summary>
 
-- **Brotli / DEFLATE**: emitted candidates, verified round-trip, shortest complete URL wins.
-- **Shared-dictionary Brotli** (brotli format version 1): frozen LZ77 dictionary v0 (base64 TS
-  module) ships with the code so payloads never carry it. Encoding uses WASM on Node/Bun
+<br>
+
+`data/dictionaries/v0.json` and `v1.json` are **immutable forever**: `hosts`, `labels`, `suffixes`
+(multi-label PSL-style: `co.uk`, `github.io`, …), `paths`, `queryKeys`, `values`. IDs never change
+meaning. New dictionaries get new version numbers, are selected by an envelope flag plus a varint,
+and every old version stays decodable — golden tests prove it across versions.
+
+v1 is active: frequency-tuned inline-32 slots and new tokens, **−12.2% corpus payload** versus v0.
+The builder guards against overfitting with a `--min-count` frequency floor (default 2) and an
+entropy/shape filter that rejects single-occurrence and random-looking tokens. Dictionaries must
+generalize, not memorize the corpus.
+
+```bash
+bun run dict:analyze   # frequency analysis → candidate tokens
+bun run dict:build     # draft the next version; refuses to touch existing files
+```
+
+</details>
+
+<details>
+<summary><b>Compression decisions, and what got rejected</b></summary>
+
+<br>
+
+- **Brotli / DEFLATE** — emitted candidates, verified round-trip, shortest complete URL wins.
+- **Shared-dictionary Brotli** (brotli format version 1) — a frozen LZ77 dictionary v0 ships with
+  the code as a base64 TS module, so payloads never carry it. Encoding uses WASM on Node and Bun
   (runtimes without it skip the candidate); decoding uses the pure-JS Google implementation so
-  workerd decodes without WebAssembly (verified 302 on real workerd). Held-out evaluation:
-  8/15 wins vs specialized — big gains on token/structural URLs (dict-similar hosts + shapes),
-  automatic fallback on novel-content URLs via per-candidate verification.
-- **Zstandard**: benchmarked with raw-content dictionary — loses everywhere (frame overhead
-  dominates at URL scale). Rejected; not wired.
-- **Huffman literals (format v1)**: emitted; -5–17% per category vs v0.
-- **Range coder (format v2)**: fully implemented and fuzz-verified (carry-propagating rc,
-  static model derived from the frozen huffman lengths), decode supported forever — but NOT
-  emitted: pool framing (~5 bytes) exceeds the ~0.3% entropy gain over Huffman across the
-  entire URL domain, including 2.4 KB payloads. Defined and retained for future large-payload
-  scenarios.
+  workerd decodes without WebAssembly, verified with a real 302 on workerd. Held-out evaluation:
+  8 of 15 wins versus specialized, with automatic fallback on novel-content URLs.
+- **Zstandard** — benchmarked with a raw-content dictionary and **rejected**. Frame overhead
+  dominates at URL scale; it loses everywhere. Not wired in.
+- **Range coder (format v2)** — fully implemented and fuzz-verified, with a carry-propagating range
+  coder and a static model derived from the frozen Huffman lengths. Decode is supported forever, but
+  it is **not emitted**: pool framing (~5 bytes) exceeds the ~0.3% entropy gain over Huffman across
+  the entire URL domain, including 2.4 KB payloads. Kept for future large-payload scenarios.
 
-## Privacy modes (spec §17)
+</details>
 
-Disabled by default (`ENABLE_PRIVATE_MODE=false`); both use AES-256-GCM via WebCrypto — identical
-behavior on Node, Bun, and workerd (verified).
+<details>
+<summary><b>Privacy modes (spec §17)</b></summary>
 
-- **Private (server-readable)** — the winning payload candidate is wrapped in the encrypted
-  format family (`11`): `[0xC0][flags][12-byte nonce][ciphertext+tag]`. Decryption tries
-  `PAYLOAD_KEY_CURRENT` then `PAYLOAD_KEY_PREVIOUS`, so key rotation keeps old links alive. The
-  inner payload may be any format family (nesting encrypted-in-encrypted is rejected). GCM
-  authentication makes tampering and wrong keys fail closed. Set keys via env / `wrangler secret`.
-- **Blind (server-blind)** — `https://x.example/p/<ciphertext>#<key>`: an ephemeral per-link key
-  lives in the URL fragment, which browsers never send to servers. The `/p/…` landing page
-  decrypts locally with WebCrypto, displays the destination, and redirects after a 3-second
-  countdown. Honest labeling: the server is blind, the link holder is not — anyone holding the
-  full link (including the fragment) can decrypt.
+<br>
 
-Encryption is never applied implicitly: ultra/human/voice modes remain plaintext unless the mode
-is explicitly requested.
+Disabled by default (`ENABLE_PRIVATE_MODE=false`). Both use AES-256-GCM through WebCrypto, with
+identical behaviour on Node, Bun and workerd. The UI reads `GET /api/capabilities` and renders these
+modes as unavailable-with-a-reason rather than letting them fail on click.
 
-## Security
+- **Private (server-readable)** — the winning candidate is wrapped in the encrypted format family
+  (`11`): `[0xC0][flags][12-byte nonce][ciphertext+tag]`. Decryption tries `PAYLOAD_KEY_CURRENT`
+  then `PAYLOAD_KEY_PREVIOUS`, so key rotation keeps old links alive. The inner payload may be any
+  format family; nesting encrypted-in-encrypted is rejected. GCM authentication makes tampering and
+  wrong keys fail closed.
+- **Blind (server-blind)** — `https://x.example/p/<ciphertext>#<key>`. An ephemeral per-link key
+  lives in the fragment, which browsers never send to servers. The `/p/…` landing page decrypts
+  locally, shows the destination, and redirects after a three-second countdown you can cancel.
 
-- Redirect targets must parse as absolute `http:`/`https:` URLs — `javascript:`, `data:`, `file:`,
+Encryption is never applied implicitly: ultra, human and voice stay plaintext unless the encrypted
+mode is explicitly requested.
+
+</details>
+
+<details>
+<summary><b>Security</b></summary>
+
+<br>
+
+- Redirect targets must parse as absolute `http:`/`https:` URLs. `javascript:`, `data:`, `file:`,
   `vbscript:`, `about:` and friends are rejected by allowlist. Control characters (CRLF injection)
-  rejected. The server never fetches destinations.
-- Payload limits: 2048 payload chars, 8192 target chars, 64 path segments, 64 query pairs,
-  1024-byte components, 64 KiB decompression cap (zip-bomb guard).
+  are rejected. The server never fetches destinations.
+- Limits: 2048 payload chars, 8192 target chars, 64 path segments, 64 query pairs, 1024-byte
+  components, and a 64 KiB decompression cap as a zip-bomb guard.
 - Headers: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `X-Frame-Options`,
   CSP on HTML routes, `X-Robots-Tag: noindex` on redirects.
-- Per-IP fixed-window rate limiting in memory (per-instance; no database by design).
-- Dictionary-version mismatch, unknown formats, and malformed bitstreams fail closed.
+- Per-IP fixed-window rate limiting in memory — per-instance, since there is no database by design.
+- Dictionary-version mismatches, unknown formats and malformed bitstreams all fail closed.
+
+</details>
 
 ## Project layout
 
 ```text
-app/                  page, encode API, inspect API, catch-all redirect route
+app/                  page, encode/inspect/capabilities APIs, catch-all redirect, blind landing
+app/_components/      measure rail, mode radiogroup, QR panel
 lib/url/              typed model, parser, safe normalizer, limit validation
-lib/codec/            opcodes, varint writer/reader, specialized bytecode, brotli,
-                      deflate, huffman (stub), candidate selection + verification
-lib/dictionaries/     immutable versioned dictionaries + registry
-lib/alphabet/         base64url, base32 + grouping + aliases, Luhn-mod-32 checksum
+lib/codec/            opcodes, varint writer/reader, specialized bytecode, brotli, deflate,
+                      huffman, range coder, candidate selection and verification
+lib/dictionaries/     immutable versioned dictionaries and registry
+lib/alphabet/         base64url, base32 + grouping + aliases, Luhn-mod-32 checksum, wordlists
 lib/security/         redirect validation, limits, rate limiting
-lib/crypto/           encryption stub (private mode disabled by default)
-data/                 dictionary versions, corpus, benchmark results
+lib/crypto/           AES-256-GCM envelope, ephemeral keys
+data/                 dictionary versions, corpus, benchmark results, golden payloads
+docs/media/           generated screenshots and diagrams (SVG + PNG)
 tests/                codec (fixtures + property), normalization, security, corpus
-tools/                benchmark, corpus analysis, dictionary builder
+tools/                benchmark, corpus analysis, dictionary builder, screenshots, diagrams
 ```
 
 ## Scripts
 
 ```bash
-bun install
 bun run dev          # development
 bun run build        # production build
 bun run start        # production server
@@ -194,16 +318,19 @@ bun run test         # bun test (422 tests)
 bun run lint         # eslint (Next 16 removed `next lint`; direct eslint is the successor)
 bun run typecheck    # tsc --noEmit
 bun run benchmark    # size/latency benchmark across strategies and categories
-bun run dict:analyze # frequency analysis → dictionary candidates
-bun run dict:build   # draft the next immutable dictionary version
 bun run cli          # CLI: encode/decode/inspect (bun cli.ts --help)
+bun run media        # regenerate every diagram and screenshot in docs/media
 ```
+
+`bun run media` needs a Chromium in the local Playwright cache. If you do not have one:
+`bunx playwright install chromium`. Diagrams also need `rsvg-convert` (`brew install librsvg`).
+Both are development-only; neither ships with the app.
 
 ## Environment
 
 ```text
 PUBLIC_ORIGIN=https://x.example      # origin used for generated URLs
-ENABLE_PRIVATE_MODE=false            # enables private + blind modes in the API/UI
+ENABLE_PRIVATE_MODE=false            # enables private + blind modes in the API and UI
 PAYLOAD_KEY_CURRENT=                 # 32-byte base64url AES key (new encryptions)
 PAYLOAD_KEY_PREVIOUS=                # optional; keeps old links decodable across rotation
 ACTIVE_DICTIONARY_VERSION=1
@@ -211,39 +338,20 @@ MAX_PAYLOAD_LENGTH=2048
 MAX_TARGET_LENGTH=8192
 ```
 
-On Cloudflare, set secrets with `wrangler secret put PAYLOAD_KEY_CURRENT` (never in `vars`);
-locally use `.dev.vars` (gitignored).
-
-## Benchmark highlights
-
-`bun run benchmark` (origin `http://localhost:3000`; payload-level ratio vs raw Base64URL):
-
-```text
-category         raw-b64url  specialized  auto-selected
-tracking             177          102            102   (0.576)
-unicode              145           84             84   (0.579)
-uuid                 146           97             97   (0.664)
-api                  152          120            106   (0.697, brotli wins some)
-long-paths           126          103             98   (0.778)
-service-template      89           66             66   (0.742)
-```
-
-Full results in `data/benchmarks/benchmark.json`; regression baseline in
-`data/benchmarks/baseline.json` (corpus tests fail on >5% category regression).
+On Cloudflare, set secrets with `wrangler secret put PAYLOAD_KEY_CURRENT` — never in `vars`.
+Locally use `.dev.vars`, which is gitignored.
 
 ## Deployment
 
-Two supported targets, same codebase, byte-identical decode behavior:
+Two supported targets, one codebase, byte-identical decode behaviour.
 
-### Self-hosted (Node / Bun)
+**Self-hosted (Node / Bun)**
 
 ```bash
-bun run build && bun run start   # next start, Node runtime
+bun run build && bun run start
 ```
 
-Set `PUBLIC_ORIGIN` to the public origin serving the app.
-
-### Cloudflare Workers (workerd)
+**Cloudflare Workers (workerd)**
 
 ```bash
 bun run preview:cloudflare   # build + local workerd preview (miniflare)
@@ -251,22 +359,18 @@ bun run deploy:cloudflare    # build + wrangler deploy
 ```
 
 Uses `@opennextjs/cloudflare` with `nodejs_compat` (see `wrangler.jsonc`, `open-next.config.ts`).
-Parity is verified: specialized, Brotli, and DEFLATE payloads all decode identically under
-workerd — the compression adapter (`lib/codec/compress.ts`) prefers `node:zlib` and falls back to
-Web `DecompressionStream` per format, capability-detected at runtime. `PUBLIC_ORIGIN` and limits
-are set as Worker vars.
+Parity is verified: specialized, Brotli and DEFLATE payloads all decode identically under workerd.
+The compression adapter (`lib/codec/compress.ts`) prefers `node:zlib` and falls back to Web
+`DecompressionStream` per format, capability-detected at runtime. Cloudflare also works as a plain
+CDN in front of a self-hosted origin.
 
-Also works with Cloudflare as a plain CDN/proxy in front of the self-hosted origin.
+Runtime notes: patched Next.js **16.2.11** (July 2026 security release — 4 high, 5 medium),
+exact-pinned with the lockfile committed. Pin runtime versions in deployment and confirm local and
+production decoders agree; the round-trip and golden tests are the contract.
 
-## Not yet implemented
+## Status
 
-Nothing on the original roadmap remains open. Possible future work: trained (not corpus-snapshot)
-dictionaries for v2+, more service templates, and a `urlc` npm publish for global CLI install.
-Encode history is stored in `localStorage` only — the server remains fully stateless.
-
-## Deployment constraints
-
-- Patched Next.js **16.2.11** (July 2026 security release: 4 high + 5 medium fixes), exact-pinned
-  with the lockfile committed.
-- Pin runtime versions in deployment and confirm local/production decoders agree (the round-trip
-  and golden tests are the contract).
+Nothing on the original roadmap remains open. Possible future work: trained (rather than
+corpus-snapshot) dictionaries for v2+, more service templates, and publishing `urlc` to npm for
+global CLI install. Encode history is stored in `localStorage` only — the server stays fully
+stateless.
