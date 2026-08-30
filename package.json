@@ -12,6 +12,9 @@
     "lint": "eslint .",
     "test": "bun test",
     "benchmark": "bun tools/benchmark.ts",
+    "media": "bun tools/diagrams.ts && bun tools/screenshot.ts",
+    "media:diagrams": "bun tools/diagrams.ts",
+    "media:screenshots": "bun tools/screenshot.ts",
     "dict:build": "bun tools/build-dictionary.ts",
     "dict:analyze": "bun tools/analyze-corpus.ts",
     "golden:generate": "bun tools/generate-golden.ts",
@@ -37,6 +40,7 @@
     "bun-types": "^1.3.14",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
+    "playwright-core": "^1.62.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "wrangler": "^4.123.0"

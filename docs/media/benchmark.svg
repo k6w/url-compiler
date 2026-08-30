@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 710" width="1200" height="710" role="img">
+<rect x="0" y="0" width="1200" height="710" rx="0" fill="#14161d"/>
+<text x="80" y="44" fill="#e7e3da" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">Average URL length before and after, by category</text>
+<text x="80" y="68" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" text-anchor="start">36 of 49 benchmark URLs come out shorter. The rest are reported, not hidden.</text>
+<rect x="80" y="88" width="22" height="9" rx="2" fill="#2c313d"/>
+<text x="110" y="97" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="start">original</text>
+<rect x="190" y="88" width="22" height="9" rx="2" fill="#ffb454"/>
+<text x="220" y="97" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="start">compiled</text>
+<rect x="306" y="88" width="22" height="9" rx="2" fill="#ff6f5e"/>
+<text x="336" y="97" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="start">compiled, but longer</text>
+<line x1="80" y1="118" x2="1120" y2="118" stroke="#2c313d" stroke-width="1"/>
+<text x="80" y="156" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">tracking</text>
+<text x="80" y="172" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">4 urls</text>
+<rect x="250" y="144" width="750" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="159" width="265.0862068965517" height="11" rx="2" fill="#ffb454"/>
+<text x="1120" y="154" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">116 → 41</text>
+<text x="1120" y="171" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">35%</text>
+<text x="80" y="208" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">api</text>
+<text x="80" y="224" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">4 urls</text>
+<rect x="250" y="196" width="627.155172413793" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="211" width="278.01724137931035" height="11" rx="2" fill="#ffb454"/>
+<text x="1120" y="206" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">97 → 43</text>
+<text x="1120" y="223" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">44%</text>
+<text x="80" y="260" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">uuid</text>
+<text x="80" y="276" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">4 urls</text>
+<rect x="250" y="248" width="594.8275862068966" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="263" width="265.0862068965517" height="11" rx="2" fill="#ffb454"/>
+<text x="1120" y="258" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">92 → 41</text>
+<text x="1120" y="275" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">45%</text>
+<text x="80" y="312" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">ecommerce</text>
+<text x="80" y="328" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">5 urls</text>
+<rect x="250" y="300" width="575.4310344827586" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="315" width="265.0862068965517" height="11" rx="2" fill="#ffb454"/>
+<text x="1120" y="310" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">89 → 41</text>
+<text x="1120" y="327" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">46%</text>
+<text x="80" y="364" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">long-paths</text>
+<text x="80" y="380" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">5 urls</text>
+<rect x="250" y="352" width="504.3103448275862" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="367" width="265.0862068965517" height="11" rx="2" fill="#ffb454"/>
+<text x="1120" y="362" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">78 → 41</text>
+<text x="1120" y="379" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">53%</text>
+<text x="80" y="416" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">random-token</text>
+<text x="80" y="432" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">5 urls</text>
+<rect x="250" y="404" width="459.051724137931" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="419" width="265.0862068965517" height="11" rx="2" fill="#ffb454"/>
+<text x="1120" y="414" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">71 → 41</text>
+<text x="1120" y="431" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">58%</text>
+<text x="80" y="468" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">social</text>
+<text x="80" y="484" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">5 urls</text>
+<rect x="250" y="456" width="349.13793103448273" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="471" width="258.62068965517244" height="11" rx="2" fill="#ffb454"/>
+<text x="1120" y="466" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">54 → 40</text>
+<text x="1120" y="483" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">74%</text>
+<text x="80" y="520" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">service-template</text>
+<text x="80" y="536" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">6 urls</text>
+<rect x="250" y="508" width="323.2758620689655" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="523" width="258.62068965517244" height="11" rx="2" fill="#ffb454"/>
+<text x="1120" y="518" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">50 → 40</text>
+<text x="1120" y="535" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">80%</text>
+<text x="80" y="572" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">short</text>
+<text x="80" y="588" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">6 urls</text>
+<rect x="250" y="560" width="174.56896551724137" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="575" width="226.29310344827584" height="11" rx="2" fill="#ff6f5e"/>
+<text x="1120" y="570" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">27 → 35</text>
+<text x="1120" y="587" fill="#ff6f5e" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">130%</text>
+<text x="80" y="624" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">unicode</text>
+<text x="80" y="640" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" font-weight="400" text-anchor="start">5 urls</text>
+<rect x="250" y="612" width="252.1551724137931" height="11" rx="2" fill="#2c313d"/>
+<rect x="250" y="627" width="497.8448275862069" height="11" rx="2" fill="#ff6f5e"/>
+<text x="1120" y="622" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" text-anchor="end">39 → 77</text>
+<text x="1120" y="639" fill="#ff6f5e" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" text-anchor="end">197%</text>
+<text x="80" y="686" fill="#5d6273" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">Source: data/benchmarks/latest.json — regenerate with `bun run benchmark`.</text>
+</svg>

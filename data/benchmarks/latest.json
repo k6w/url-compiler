@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-17T13:25:18.308Z",
+  "generatedAt": "2026-08-30T15:50:42.778Z",
   "total": 49,
   "shortenedCount": 36,
   "categories": [
@@ -12,8 +12,8 @@
       "avgHuman": 43,
       "minUltra": 30,
       "maxUltra": 41,
-      "encodeMs": 9.28,
-      "decodeMs": 0.15
+      "encodeMs": 15.97,
+      "decodeMs": 0.25
     },
     {
       "category": "long-paths",
@@ -24,8 +24,8 @@
       "avgHuman": 53,
       "minUltra": 41,
       "maxUltra": 41,
-      "encodeMs": 8.12,
-      "decodeMs": 0.68
+      "encodeMs": 14.23,
+      "decodeMs": 1.12
     },
     {
       "category": "tracking",
@@ -36,8 +36,8 @@
       "avgHuman": 53,
       "minUltra": 41,
       "maxUltra": 41,
-      "encodeMs": 6.87,
-      "decodeMs": 0.55
+      "encodeMs": 12.13,
+      "decodeMs": 0.94
     },
     {
       "category": "api",
@@ -48,8 +48,8 @@
       "avgHuman": 56,
       "minUltra": 41,
       "maxUltra": 48,
-      "encodeMs": 6.6,
-      "decodeMs": 0.53
+      "encodeMs": 11.59,
+      "decodeMs": 0.91
     },
     {
       "category": "uuid",
@@ -60,8 +60,8 @@
       "avgHuman": 53,
       "minUltra": 41,
       "maxUltra": 41,
-      "encodeMs": 6.4,
-      "decodeMs": 0.62
+      "encodeMs": 11.41,
+      "decodeMs": 1.06
     },
     {
       "category": "random-token",
@@ -72,8 +72,8 @@
       "avgHuman": 52,
       "minUltra": 40,
       "maxUltra": 41,
-      "encodeMs": 8.56,
-      "decodeMs": 0.69
+      "encodeMs": 14.6,
+      "decodeMs": 1.19
     },
     {
       "category": "unicode",
@@ -84,8 +84,8 @@
       "avgHuman": 107,
       "minUltra": 60,
       "maxUltra": 128,
-      "encodeMs": 9.46,
-      "decodeMs": 0.03
+      "encodeMs": 16.28,
+      "decodeMs": 0.05
     },
     {
       "category": "ecommerce",
@@ -96,8 +96,8 @@
       "avgHuman": 52,
       "minUltra": 40,
       "maxUltra": 41,
-      "encodeMs": 8.19,
-      "decodeMs": 0.66
+      "encodeMs": 14.43,
+      "decodeMs": 1.17
     },
     {
       "category": "social",
@@ -108,8 +108,8 @@
       "avgHuman": 51,
       "minUltra": 40,
       "maxUltra": 41,
-      "encodeMs": 7.82,
-      "decodeMs": 0.72
+      "encodeMs": 13.68,
+      "decodeMs": 1.18
     },
     {
       "category": "service-template",
@@ -120,8 +120,8 @@
       "avgHuman": 50,
       "minUltra": 40,
       "maxUltra": 40,
-      "encodeMs": 9.69,
-      "decodeMs": 0.74
+      "encodeMs": 16.99,
+      "decodeMs": 1.16
     }
   ]
 }

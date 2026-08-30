@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600" role="img">
+<rect x="0" y="0" width="1200" height="600" rx="0" fill="#14161d"/>
+<text x="80" y="34" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10" font-weight="600" text-anchor="start" letter-spacing="1.6">INPUT</text>
+<text x="80" y="60" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="14" font-weight="400" text-anchor="start">https://www.example.com/products/12345?utm_source=google&amp;id=7</text>
+<text x="1120" y="60" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="end">61 chars</text>
+<line x1="200" y1="76" x2="200" y2="111" stroke="#2c313d" stroke-width="1"/><path d="M 196.5 110 L 200 116 L 203.5 110 Z" fill="#2c313d"/>
+<rect x="80" y="116" width="240" height="78" rx="5" fill="#1a1d26" stroke="#2c313d"/>
+<text x="96" y="143" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="start">parse</text>
+<text x="96" y="163" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">Platform URL parser.</text>
+<text x="96" y="178" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">Malformed input rejected.</text>
+<rect x="480" y="116" width="240" height="78" rx="5" fill="#1a1d26" stroke="#2c313d"/>
+<text x="496" y="143" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="start">normalize</text>
+<text x="496" y="163" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">Lowercase host, implicit https,</text>
+<text x="496" y="178" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">unreserved %xx only.</text>
+<rect x="880" y="116" width="240" height="78" rx="5" fill="#1a1d26" stroke="#2c313d"/>
+<text x="896" y="143" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="start">typed model</text>
+<text x="896" y="163" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">scheme · host · path[]</text>
+<text x="896" y="178" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">query[] · fragment</text>
+<line x1="320" y1="155" x2="474" y2="155" stroke="#2c313d" stroke-width="1"/>
+<path d="M 473 151.5 L 479 155 L 473 158.5 Z" fill="#2c313d"/>
+<line x1="720" y1="155" x2="874" y2="155" stroke="#2c313d" stroke-width="1"/>
+<path d="M 873 151.5 L 879 155 L 873 158.5 Z" fill="#2c313d"/>
+<line x1="1000" y1="194" x2="1000" y2="226" stroke="#2c313d" stroke-width="1"/>
+<line x1="200" y1="226" x2="1000" y2="226" stroke="#2c313d" stroke-width="1"/>
+<text x="196" y="218" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10" font-weight="600" text-anchor="start" letter-spacing="1.6">EVERY ENCODER RUNS; EACH RESULT MUST DECODE BACK</text>
+<line x1="200" y1="226" x2="200" y2="261" stroke="#2c313d" stroke-width="1"/><path d="M 196.5 260 L 200 266 L 203.5 260 Z" fill="#2c313d"/>
+<line x1="600" y1="226" x2="600" y2="261" stroke="#2c313d" stroke-width="1"/><path d="M 596.5 260 L 600 266 L 603.5 260 Z" fill="#2c313d"/>
+<line x1="1000" y1="226" x2="1000" y2="261" stroke="#2c313d" stroke-width="1"/><path d="M 996.5 260 L 1000 266 L 1003.5 260 Z" fill="#2c313d"/>
+<rect x="80" y="266" width="240" height="78" rx="5" fill="#1a1d26" stroke="#ffb454"/>
+<text x="96" y="293" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="start">specialized</text>
+<text x="96" y="315" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">14 bytes</text>
+<text x="96" y="332" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">✓ round-trips exactly</text>
+<rect x="480" y="266" width="240" height="78" rx="5" fill="#1a1d26" stroke="#2c313d"/>
+<text x="496" y="293" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="start">specialized+huffman</text>
+<text x="496" y="315" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">14 bytes</text>
+<text x="496" y="332" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">✓ round-trips exactly</text>
+<rect x="880" y="266" width="240" height="78" rx="5" fill="#1a1d26" stroke="#2c313d"/>
+<text x="896" y="293" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="start">brotli+shared-dict</text>
+<text x="896" y="315" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">19 bytes</text>
+<text x="896" y="332" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">✓ round-trips exactly</text>
+<line x1="200" y1="344" x2="200" y2="376" stroke="#2c313d" stroke-width="1"/>
+<line x1="600" y1="344" x2="600" y2="376" stroke="#2c313d" stroke-width="1"/>
+<line x1="1000" y1="344" x2="1000" y2="376" stroke="#2c313d" stroke-width="1"/>
+<line x1="200" y1="376" x2="1000" y2="376" stroke="#2c313d" stroke-width="1"/>
+<line x1="600" y1="376" x2="600" y2="407" stroke="#ffb454" stroke-width="1"/><path d="M 596.5 406 L 600 412 L 603.5 406 Z" fill="#ffb454"/>
+<rect x="390" y="412" width="420" height="56" rx="5" fill="#1a1d26" stroke="#ffb454"/>
+<text x="600" y="437" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="middle">shortest verified candidate wins</text>
+<text x="600" y="455" fill="#8a8fa0" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="middle">unverifiable candidates are discarded, never shipped</text>
+<line x1="600" y1="468" x2="600" y2="481" stroke="#2c313d" stroke-width="1"/><path d="M 596.5 480 L 600 486 L 603.5 480 Z" fill="#2c313d"/>
+<text x="600" y="506" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="middle">Base64URL  ·  Base32 + checksum  ·  256-word list</text>
+<line x1="80" y1="524" x2="1120" y2="524" stroke="#2c313d" stroke-width="1"/>
+<text x="80" y="550" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10" font-weight="600" text-anchor="start" letter-spacing="1.6">OUTPUT</text>
+<text x="80" y="576" fill="#ffb454" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="14" font-weight="600" text-anchor="start">https://x.example/ACgBJgACBSkuAiEqK0c</text>
+<text x="1120" y="576" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="end">37 chars</text>
+</svg>

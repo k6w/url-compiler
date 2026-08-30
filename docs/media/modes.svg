@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 428" width="1200" height="428" role="img">
+<rect x="0" y="0" width="1200" height="428" rx="0" fill="#14161d"/>
+<text x="80" y="36" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10" font-weight="600" text-anchor="start" letter-spacing="1.6">ONE DESTINATION, THREE ALPHABETS</text>
+<text x="80" y="62" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">https://www.example.com/products/12345?utm_source=google&amp;id=7</text>
+<text x="1120" y="62" fill="#5d6273" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="end">61 chars in</text>
+<line x1="80" y1="86" x2="1120" y2="86" stroke="#2c313d" stroke-width="1"/>
+<text x="80" y="128" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="14" font-weight="600" text-anchor="start" letter-spacing="1.4">ULTRA</text>
+<text x="80" y="148" fill="#5d6273" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">Base64URL, densest</text>
+<rect x="300" y="116" width="710" height="14" rx="3" fill="#21252f"/>
+<rect x="300" y="116" width="236.66666666666666" height="14" rx="3" fill="#ffb454"/>
+<text x="1120" y="128" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="end">37 chars</text>
+<text x="300" y="154" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">https://x.example/ACgBJgACBSkuAiEqK0c</text>
+<text x="80" y="232" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="14" font-weight="600" text-anchor="start" letter-spacing="1.4">HUMAN</text>
+<text x="80" y="252" fill="#5d6273" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">Base32 + checksum</text>
+<rect x="300" y="220" width="710" height="14" rx="3" fill="#21252f"/>
+<rect x="300" y="220" width="313.4234234234234" height="14" rx="3" fill="#ffb454"/>
+<text x="1120" y="232" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="end">49 chars</text>
+<text x="300" y="258" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">https://x.example/00m0-29g0-082j-jbg2-44n2-phrg-y</text>
+<text x="80" y="336" fill="#e7e3da" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="14" font-weight="600" text-anchor="start" letter-spacing="1.4">VOICE</text>
+<text x="80" y="356" fill="#5d6273" font-family="'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" text-anchor="start">one word per byte</text>
+<rect x="300" y="324" width="710" height="14" rx="3" fill="#21252f"/>
+<rect x="300" y="324" width="710" height="14" rx="3" fill="#ff6f5e"/>
+<text x="1120" y="336" fill="#ff6f5e" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" font-weight="600" text-anchor="end">111 chars</text>
+<text x="300" y="362" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">https://x.example/acid-bottle-acorn-bonfire-acid-actor-agent-boulder-brick-actor-betty-brace-brav</text>
+<text x="300" y="379" fill="#8a8fa0" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">e-chimney-keen</text>
+</svg>
